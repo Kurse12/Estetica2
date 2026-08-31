@@ -1,0 +1,278 @@
+.portfolio-section {
+  position: relative;
+  z-index: 2;
+  min-height: 100svh;
+  /* cream-deep sits only a few RGB values off cream (the hero's background),
+     so the peeking sliver at rest was nearly invisible against it. cream-line
+     is the same warm family but distinct enough to read as its own shape. */
+  background: var(--cream-line);
+  background-image: var(--petal-texture);
+  --dome-peek: clamp(44px, 7.5vh, 90px);
+  /* Pulled up over the hero rather than sitting beside it, so the arc peeking
+     at rest costs the hero photo no height — it stays a full 100svh behind.
+     Also reclaims the hero's pin travel, which exists only to give the sticky
+     hero somewhere to hold still and must not become blank page. */
+  margin-top: calc(-1 * (var(--hero-pin-travel, 0px) + var(--dome-peek)));
+  padding-top: calc(var(--dome-peek) + clamp(2.5rem, 6vw, 4rem));
+  /* One uniform px radius, NOT the elliptical `50% / Xpx` form. At or past
+     half the width the browser clamps both radii to width/2, so at 50vw the two
+     corners meet as a TRUE semicircle — real circular curvature, no flat span
+     between them. Easing it back down unwinds that semicircle into a
+     panel with soft rounded corners. That easing is written by Hero's scroll
+     handler as inline border-top-*-radius longhands rather than through a
+     --dome-r custom property: a custom property set here would invalidate the
+     computed style of everything inside the section on every frame of the
+     scroll, and only this one box needs to hear about it. The bottom corners
+     still come from here.
+
+     The 50vw start value is the animation's own — exactly the clamp point — so
+     the pre-JS and reduced-motion paint is already the semicircle the arc wears
+     at rest.
+
+     No will-change: border-radius is not a compositable property, so the hint
+     buys no layer and only adds bookkeeping. What keeps this cheap instead is
+     Hero rounding the radius to whole pixels, which skips about half the
+     repaints of a box this size. */
+  border-radius: 50vw 50vw 0 0;
+}
+
+/* Kept fully inside the dome's box rather than bled off its right edge: the
+   section can't take overflow:hidden without clipping the carousel's 3D ring,
+   so the branch is positioned to stay within the arc on its own. */
+.portfolio-section__branch {
+  top: 18%;
+  right: 0;
+  opacity: 0.3;
+}
+
+@media (max-width: 900px) {
+  .portfolio-section__branch {
+    top: auto;
+    bottom: 1.5rem;
+    right: -2rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .portfolio-section {
+    min-height: 0;
+  }
+}
+
+.portfolio-section__ornament {
+  position: absolute;
+  /* At the dome's peak: with the radius clamped to a semicircle the top edge
+     has no flat span, so the section's top-centre *is* the apex. */
+  top: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+}
+
+/* The dome is the widest, tallest surface on the page; at the body scale used
+   by the flat sections its heading read as a small label floating in a large
+   pink field. Type and carousel are both stepped up so the section fills it. */
+.portfolio-section .section-kicker-free-heading {
+  font-size: clamp(2.1rem, 5.2vw, 4rem);
+}
+
+/* The petal layer takes the section's own animated radius, so the fall is
+   clipped by the arc rather than by the section's rectangle — otherwise petals
+   drift over the hero photo in the transparent corners above the dome. */
+.portfolio-section__petals {
+  border-radius: inherit;
+  --fall-span: 100vh;
+  z-index: 0;
+}
+
+/* A second bough, low and unflipped so it isn't a mirror of the right one, and
+   held clear of the carousel's left edge. */
+.portfolio-section__branch-left {
+  bottom: 4%;
+  left: -9rem;
+  width: 300px;
+  opacity: 0.22;
+}
+
+@media (max-width: 900px) {
+  .portfolio-section__branch-left {
+    bottom: 8rem;
+    left: -7rem;
+    width: 230px;
+  }
+}
+
+.portfolio-crown {
+  position: absolute;
+  z-index: 3;
+}
+.portfolio-crown--left {
+  top: 2.4rem;
+  left: calc(50% - 2.6rem);
+  transform: rotate(-16deg);
+}
+.portfolio-crown--right {
+  top: 2.9rem;
+  left: calc(50% + 1.7rem);
+  transform: rotate(22deg);
+}
+
+/* Loose blossoms over the dome. They sit under the content (.section carries
+   z-index 1) and drift a few pixels on long, offset cycles so the field never
+   reads as a fixed pattern. */
+.portfolio-blossoms {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.portfolio-blossom {
+  position: absolute;
+  display: block;
+  opacity: 0.55;
+  animation: blossom-drift 14s ease-in-out infinite;
+}
+
+.portfolio-blossom--a {
+  top: 34%;
+  left: 4.5%;
+  animation-duration: 15s;
+}
+.portfolio-blossom--b {
+  top: 21%;
+  left: 13%;
+  opacity: 0.42;
+  animation-duration: 11s;
+  animation-delay: -3s;
+}
+.portfolio-blossom--c {
+  bottom: 16%;
+  left: 9%;
+  opacity: 0.48;
+  animation-duration: 17s;
+  animation-delay: -6s;
+}
+.portfolio-blossom--d {
+  bottom: 26%;
+  right: 7%;
+  opacity: 0.45;
+  animation-duration: 13s;
+  animation-delay: -2s;
+}
+.portfolio-blossom--e {
+  bottom: 8%;
+  right: 14%;
+  opacity: 0.5;
+  animation-duration: 16s;
+  animation-delay: -8s;
+}
+
+@keyframes blossom-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(4px, -9px, 0) rotate(9deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-blossom {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  /* Half the field on a phone: the same count over a third of the width reads
+     as clutter behind the type. */
+  .portfolio-blossom--b,
+  .portfolio-blossom--d {
+    display: none;
+  }
+  /* Below the heading block: at phone widths the copy runs the full column,
+     and a blossom beside it lands under the text rather than next to it. */
+  .portfolio-blossom--a {
+    top: 58%;
+    left: 1%;
+  }
+  .portfolio-blossom--e {
+    right: 3%;
+    bottom: 6%;
+  }
+}
+
+.portfolio-subtitle {
+  color: var(--taupe-soft);
+  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  max-width: 46ch;
+  margin-top: 0.9rem;
+}
+
+/* Broken out past the 1200px .section column: the ring is the section's whole
+   point, and percentage margins resolve against the parent's width, so this
+   widens it symmetrically without a transform that would flatten the 3D. */
+.portfolio-carousel {
+  margin-top: 1.75rem;
+  width: min(1300px, 92vw);
+  margin-inline: calc(50% - min(650px, 46vw));
+}
+
+.portfolio-book {
+  display: block;
+  margin: 1.5rem auto 0;
+  min-height: 44px;
+  padding: 0.65rem 1.5rem;
+  background: transparent;
+  border: 1.5px solid var(--sage-deep);
+  border-radius: 999px;
+  color: var(--sage-deep);
+  font-size: var(--fs-small);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.portfolio-book:hover {
+  background: var(--sage-deep);
+  color: var(--white);
+}
+
+/* The dome already contributes --dome-peek plus its own top padding above the
+   heading, so the shared .section block padding is trimmed here — otherwise the
+   enlarged type and carousel push the section past one screen. */
+.portfolio-section .section {
+  padding-top: clamp(1.25rem, 2.5vw, 2rem);
+  padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.photo-grid {
+  margin-top: 2.75rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.75rem;
+}
+
+.photo-card {
+  margin: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-deep);
+}
+
+.photo-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.photo-card figcaption {
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  padding: 0.85rem 1rem 1rem;
+}

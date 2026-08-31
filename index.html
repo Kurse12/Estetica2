@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Favicon set: the SVG mark covers modern browsers, the PNGs are the
+         fallback for the ones that don't rasterize SVG favicons, and the
+         manifest is what iOS/Android read for a home-screen icon. All five
+         are baked from public/favicon.svg — the same five-petal mark used
+         for the logo — so update that file and re-render these if it changes. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <!-- viewport-fit=cover so env(safe-area-inset-*) reports real values; the
+         nav, sections and footer pad against them rather than running under a
+         notch in landscape. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Sakura Bloom — salón de belleza. Trabajos, servicios, profesionales y reserva de turnos online." />
+    <meta name="theme-color" content="#fdf7f6" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital@1&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    <title>Sakura Bloom — Salón de Belleza</title>
+
+    <!-- Open Graph / Twitter preview. og:image reuses the hero photograph
+         (see Hero.jsx) cropped to the 1200x630 og:image convention, so a
+         shared link previews the same photo visitors see first on the site.
+         og:url is a placeholder — swap it for the real domain once the site
+         is deployed. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sakura Bloom" />
+    <meta property="og:url" content="https://sakurabloom.com/" />
+    <meta property="og:title" content="Sakura Bloom — Salón de Belleza" />
+    <meta property="og:description" content="Sakura Bloom — salón de belleza. Trabajos, servicios, profesionales y reserva de turnos online." />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1761864534000-337153e88c92?w=1200&h=630&q=80&fm=jpg&fit=crop&auto=format" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Flores de cerezo — Sakura Bloom" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sakura Bloom — Salón de Belleza" />
+    <meta name="twitter:description" content="Sakura Bloom — salón de belleza. Trabajos, servicios, profesionales y reserva de turnos online." />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1761864534000-337153e88c92?w=1200&h=630&q=80&fm=jpg&fit=crop&auto=format" />
+
+    <!-- The hero photograph is the whole first viewport and the page's LCP, so
+         the browser is told about it here rather than discovering it three
+         seconds later, when the app bundle finally runs. The preloader below
+         reads this tag back to know what it is waiting for, so the URL lives in
+         one place in this document. It is mirrored in src/components/Hero.jsx,
+         which is what actually renders the photo; keep the two in step. -->
+    <link
+      rel="preload"
+      as="image"
+      href="https://images.unsplash.com/photo-1761864534000-337153e88c92?w=2400&q=80&fm=jpg&fit=crop&auto=format"
+    />
+
+    <!-- ===================================================================
+         Preloader
+
+         This lives in the document shell, not in the React tree, and that is
+         the whole point: a curtain rendered by the app cannot cover the app's
+         own download. Mounted from a component it appeared only once the
+         bundle had parsed - several seconds of blank cream first - and by then
+         the fonts and the photo were already warm, so its progress bar was
+         born at 98%. Inline markup, inline CSS and an inline script paint it
+         on the browser's first frame instead.
+
+         Because it paints before the CSS bundle arrives, the palette repeats
+         the literals from src/styles/tokens.css instead of reading the custom
+         properties. Those are the only duplicated values here; if the rose
+         ramp moves, it moves in both places.
+         =================================================================== -->
+    <style>
+      #preloader {
+        position: fixed;
+        inset: 0;
+        z-index: 100; /* over the nav's 40 - nothing shows through the curtain */
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+        overflow: hidden;
+        background: #fdf7f6; /* --cream */
+        color: #46383a; /* --taupe */
+        font-family: "Work Sans", -apple-system, "Segoe UI", sans-serif;
+        transition:
+          opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+          visibility 0.8s;
+      }
+
+      /* A blush bloom behind the lockup, so the centre of the screen is lit
+         rather than flat cream. Three stops, not two: a two-stop ellipse
+         leaves a visible oval edge on a tall phone viewport. */
+      #preloader::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          82% 54% at 50% 46%,
+          #fcf1f2 0%,
+          rgba(252, 241, 242, 0.5) 46%,
+          rgba(252, 241, 242, 0) 82%
+        );
+      }
+
+      .preloader__inner {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: preloader-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      /* The mark opens rather than appears: it lands from under-scale and off
+         axis, then keeps a slow breath, so the curtain is never a frozen
+         picture while the page is still arriving. */
+      .preloader__mark {
+        animation:
+          preloader-bloom 1s cubic-bezier(0.16, 1, 0.3, 1) both,
+          preloader-breathe 4.5s ease-in-out 1s infinite;
+      }
+
+      /* The stacked lockup, rebuilt from the same rules as .brand-logo--stacked.
+         Until the webfont lands this is set in Georgia, which at this tracking
+         and size is a near-enough stand-in for the Caslon that replaces it. */
+      .preloader__name {
+        margin-top: 0.7rem;
+        font-family: "Libre Caslon Display", Georgia, "Times New Roman", serif;
+        font-size: 1.7rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        line-height: 1;
+      }
+
+      .preloader__tail {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin-top: 0.4rem;
+        font-family: "Libre Caslon Text", Georgia, serif;
+        font-style: italic;
+        font-size: 0.86rem;
+        letter-spacing: 0.3em;
+        text-indent: 0.3em;
+        color: #a8455f; /* --cherry */
+      }
+
+      .preloader__tail::before,
+      .preloader__tail::after {
+        content: "";
+        width: 26px;
+        height: 1px;
+        background: #ddc38f; /* --gold-light */
+      }
+
+      .preloader__tagline {
+        margin: 1.35rem 0 0;
+        font-size: 0.82rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: #a8968f; /* --taupe-faint */
+      }
+
+      /* One gold hairline with the rose ramp filling from the left.
+         --preloader-progress (0..1) is written by the script every frame. */
+      .preloader__track {
+        --preloader-progress: 0;
+        position: relative;
+        width: min(200px, 60vw);
+        height: 1px;
+        margin-top: 1.5rem;
+        background: #f0dcda; /* --cream-line */
+      }
+
+      .preloader__fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: calc(var(--preloader-progress) * 100%);
+        background: linear-gradient(90deg, #e29fb1, #a8455f);
+      }
+
+      /* A blossom rides the leading edge, so the progress rule is the brand's
+         own mark travelling a branch rather than a borrowed bar. */
+      .preloader__pip {
+        position: absolute;
+        top: 50%;
+        left: calc(var(--preloader-progress) * 100%);
+        display: flex;
+        transform: translate(-50%, -50%);
+        filter: drop-shadow(0 2px 6px rgba(125, 49, 69, 0.28));
+      }
+
+      .preloader__pip svg {
+        animation: preloader-spin 6s linear infinite;
+      }
+
+      .preloader__percent {
+        margin-top: 1.5rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.18em;
+        color: #a8968f;
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Ambient drift, the same weather the hero carries, thinned right down.
+         Petals are appended by the script so this stays out of the markup. */
+      .preloader__petal {
+        position: absolute;
+        top: -6%;
+        border-radius: 100% 0 100% 0;
+        background: #f0c2cd; /* --sakura */
+        animation-name: preloader-fall;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+      }
+
+      /* The curtain lifts as one piece: it fades while the lockup drifts up,
+         so the hero is uncovered rather than switched to. */
+      #preloader.is-lifting {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      #preloader.is-lifting .preloader__inner {
+        transform: translateY(-14px);
+        transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* The page underneath must not scroll behind the curtain. The class is
+         added by the script, never sat in the markup: if the script never runs,
+         nothing may be left holding the page still. */
+      html.is-preloading,
+      html.is-preloading body {
+        overflow: hidden;
+      }
+
+      @keyframes preloader-rise {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+      }
+
+      @keyframes preloader-bloom {
+        from {
+          opacity: 0;
+          transform: rotate(-46deg) scale(0.55);
+        }
+        to {
+          opacity: 1;
+          transform: rotate(-8deg) scale(1);
+        }
+      }
+
+      @keyframes preloader-breathe {
+        0%,
+        100% {
+          transform: rotate(-8deg) scale(1);
+        }
+        50% {
+          transform: rotate(4deg) scale(1.07);
+        }
+      }
+
+      @keyframes preloader-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes preloader-fall {
+        0% {
+          transform: translate3d(0, -10%, 0) rotate(0deg);
+          opacity: 0;
+        }
+        8% {
+          opacity: var(--peak);
+        }
+        92% {
+          opacity: calc(var(--peak) * 0.8);
+        }
+        100% {
+          transform: translate3d(calc(var(--drift) * 50px), 115vh, 0) rotate(var(--spin));
+          opacity: 0;
+        }
+      }
+
+      /* Under reduced motion the curtain still covers, reports and leaves,
+         but nothing blooms, breathes, spins or drifts. */
+      @media (prefers-reduced-motion: reduce) {
+        #preloader,
+        #preloader.is-lifting .preloader__inner {
+          transition-duration: 0.2s;
+        }
+
+        .preloader__inner,
+        .preloader__mark,
+        .preloader__pip svg {
+          animation: none;
+        }
+
+        #preloader.is-lifting .preloader__inner {
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      THESIS: Elegant Spa Classic, and the cherry blossom is now the salon itself — the brand is Sakura Bloom, so the motif stops being an ornament laid over the category standard and becomes the thing the category standard is executed in: one notched-petal mark that is the logo, the favicon, the section seal and the confirmation, a rose ramp promoted from accent to primary, and fallen petals as the ground every surface is printed on.
+      OWN-WORLD: Blush-cream ground carrying a tiled fallen-petal texture, a five-step rose ramp (petal pale to --cherry, the AA-contrast ink/CTA weight) as the primary with sage kept as the quiet second voice, warm taupe ink, gold stamens and hairlines, --branch bark for the line-art boughs that enter each section from an opposite corner. Libre Caslon Display/Text (italic) for headings, Work Sans for body and UI. Arched image frames, oversized display type with italic emphasis words, a line-art blossom-and-branch divider between sections, a dense bounded falling-petals layer in the hero. The Portfolio section rises over the hero as a giant domed panel (large top border-radius + negative margin-top overlap, a single blossom mark at its peak), lifted directly from venetianspa.ca's own hero-to-section technique. Nav goes from transparent-over-hero to a solid frosted bar on scroll; each section's heading/subtitle/content stagger in on their own scroll-reveal rather than fading in as one block. Craft bar named by the user: goldustspa.com (soft italic display, rounded organic photo shapes) and venetianspa.ca (bold tracked headlines, arched photo frames and hero-overlap dome, ornamental flourish motifs, transparent-to-solid sticky nav, staggered per-block scroll reveals) — both studied directly with a live browser, DOM/CSS inspected, neither copied verbatim.
+      STORY: The visitor reads the salon as calm, light-filled, and trustworthy — sees real work, clear pricing, real professionals — then books in a soft, guided step-by-step flow that ends in a gentle confirmation.
+      FIRST VIEWPORT: A split hero — the blossom mark, an oversized serif headline ("Florecé en tu mejor versión") with the italic emphasis in cherry, and the CTA on cream at left; a full-bleed cherry-blossom photograph behind, with petals drifting down over the whole viewport.
+      FORM: Elegant Spa Classic — the standing exit (category canon) — raised with a user-directed sakura motif after two named craft-bar references. Craft bar: goldustspa.com, venetianspa.ca.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+    -->
+    <!-- The curtain. Its mark is the same five-petal blossom the app draws in
+         src/components/Sakura.jsx, written out here as flat SVG because nothing
+         from the bundle exists yet at this point in the page's life. The whole
+         lockup is aria-hidden: the region carries one label, so a screen reader
+         hears "Cargando Sakura Bloom" once instead of a percentage counting up. -->
+    <div id="preloader" role="status" aria-label="Cargando Sakura Bloom">
+      <div class="preloader__inner" aria-hidden="true">
+        <svg class="preloader__mark" width="54" height="54" viewBox="0 0 40 40" fill="none">
+          <g opacity="0.92">
+            <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(0 20 20)" fill="#c2657f" />
+            <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(72 20 20)" fill="#c2657f" />
+            <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(144 20 20)" fill="#c2657f" />
+            <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(216 20 20)" fill="#c2657f" />
+            <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(288 20 20)" fill="#c2657f" />
+        </g>
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(0 20 20)" />
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(45 20 20)" />
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(90 20 20)" />
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(135 20 20)" />
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(180 20 20)" />
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(225 20 20)" />
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(270 20 20)" />
+          <circle cx="20" cy="15.2" r="1.15" fill="#b99a63" transform="rotate(315 20 20)" />
+          <circle cx="20" cy="20" r="2" fill="#b99a63" />
+        </svg>
+        <span class="preloader__name">Sakura</span>
+        <span class="preloader__tail">bloom</span>
+        <p class="preloader__tagline">Preparando tu visita</p>
+        <div class="preloader__track">
+          <span class="preloader__fill"></span>
+          <span class="preloader__pip">
+            <svg width="17" height="17" viewBox="0 0 40 40" fill="none">
+              <g opacity="0.92">
+                <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(0 20 20)" fill="#a8455f" />
+                <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(72 20 20)" fill="#a8455f" />
+                <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(144 20 20)" fill="#a8455f" />
+                <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(216 20 20)" fill="#a8455f" />
+                <path d="M20 19.6C15.4 17.6 12.7 14 12.9 9.8C13.1 5.6 14.6 3.4 16.4 3.6C17.9 3.8 19 5 20 6.4C21 5 22.1 3.8 23.6 3.6C25.4 3.4 26.9 5.6 27.1 9.8C27.3 14 24.6 17.6 20 19.6Z" transform="rotate(288 20 20)" fill="#a8455f" />
+              </g>
+            </svg>
+          </span>
+        </div>
+        <span class="preloader__percent">0%</span>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var el = document.getElementById("preloader");
+        if (!el) return;
+
+        var root = document.documentElement;
+        var track = el.querySelector(".preloader__track");
+        var percent = el.querySelector(".preloader__percent");
+        var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        // How long the hairline takes to cross the track at full speed. It is
+        // also, in effect, the curtain's minimum life: the bar starts at zero
+        // and is never allowed to teleport, so even a fully cached load shows
+        // it travelling instead of snapping straight to the end.
+        var SWEEP = 850;
+        // A stalled photo does not get to hold the page hostage. Measured from
+        // navigation start, which is what performance.now() counts from.
+        var MAX_WAIT = 6000;
+        var FADE = reduced ? 200 : 800;
+
+        root.classList.add("is-preloading");
+
+        // ---- what the curtain is waiting for ---------------------------
+        var appReady;
+        var appMounted = new Promise(function (resolve) {
+          appReady = resolve;
+        });
+
+        // Read back off the <link rel="preload"> tags rather than repeating any
+        // URL here. Each resolves on failure as well as on load: a photo that
+        // 404s is a hole in the hero, not a reason to trap the visitor.
+        var images = [].map.call(
+          document.querySelectorAll('link[rel="preload"][as="image"]'),
+          function (link) {
+            return new Promise(function (resolve) {
+              var img = new Image();
+              img.onload = img.onerror = resolve;
+              img.src = link.href;
+              if (img.complete) resolve();
+            });
+          }
+        );
+
+        // The webfonts count as an asset: the display serif is what the lockup
+        // and the hero headline are made of, so lifting before it lands only
+        // moves the reflow into view instead of hiding it.
+        var jobs = [appMounted, document.fonts ? document.fonts.ready : Promise.resolve()].concat(
+          images
+        );
+
+        var settled = 0;
+        var advanced = 0;
+        function bump() {
+          settled += 1;
+          // Each landing restarts the ease, so the bar sets off again from
+          // wherever the last one left it.
+          advanced = performance.now();
+        }
+        jobs.forEach(function (job) {
+          Promise.resolve(job).then(bump, bump);
+        });
+
+        var complete = false;
+        Promise.race([
+          Promise.all(
+            jobs.map(function (job) {
+              return Promise.resolve(job)["catch"](function () {});
+            })
+          ),
+          new Promise(function (resolve) {
+            setTimeout(resolve, MAX_WAIT);
+          }),
+        ]).then(function () {
+          complete = true;
+        });
+
+        // ---- the bar ----------------------------------------------------
+        var shown = 0;
+        var last = 0;
+
+        function frame(now) {
+          var dt = last ? Math.min(now - last, 50) : 16;
+          last = now;
+
+          // What has genuinely landed sets the floor, and between milestones the
+          // bar eases toward the next one without ever reaching it - so it keeps
+          // moving through a long download instead of sitting dead while one
+          // file arrives. Racing a clock-driven crawl against the real count
+          // instead, which is the obvious way to write this, stalls the bar
+          // outright whenever the count runs ahead of the clock: on a warm
+          // cache two of the three jobs land in the first frame, and the bar
+          // then holds still at 67% for over a second waiting to be overtaken.
+          var base = settled / jobs.length;
+          var next = Math.min(settled + 1, jobs.length) / jobs.length;
+          var eased = base + (next - base) * (1 - Math.exp(-(now - advanced) / 900));
+          var target = complete ? 1 : Math.min(0.985, eased);
+
+          // Capped speed, so the bar always travels its distance rather than
+          // jumping to wherever the truth happens to be.
+          shown = Math.min(target, shown + dt / SWEEP);
+          track.style.setProperty("--preloader-progress", shown.toFixed(4));
+          percent.textContent = Math.round(shown * 100) + "%";
+
+          if (complete && shown >= 1) return lift();
+          requestAnimationFrame(frame);
+        }
+
+        var settleCurtain;
+        var lifted = new Promise(function (resolve) {
+          settleCurtain = resolve;
+        });
+
+        function lift() {
+          el.className = "is-lifting";
+          // Scroll is released as the fade begins, not after it: the curtain is
+          // already non-interactive by then, and holding a page that looks ready
+          // for another 800ms is what makes it feel stuck.
+          root.classList.remove("is-preloading");
+          settleCurtain();
+          setTimeout(function () {
+            el.parentNode && el.parentNode.removeChild(el);
+          }, FADE);
+        }
+
+        // ---- ambient drift ----------------------------------------------
+        if (!reduced) {
+          var field = document.createDocumentFragment();
+          for (var i = 0; i < 16; i++) {
+            var petal = document.createElement("span");
+            var size = 6 + Math.random() * 9;
+            petal.className = "preloader__petal";
+            petal.style.cssText =
+              "left:" + Math.round(Math.random() * 100) + "%;" +
+              "width:" + size + "px;height:" + size + "px;" +
+              "animation-delay:" + (Math.random() * 10 - 6).toFixed(2) + "s;" +
+              "animation-duration:" + (9 + Math.random() * 9).toFixed(2) + "s;" +
+              "--drift:" + (Math.random() > 0.5 ? 1 : -1) + ";" +
+              "--spin:" + Math.round(160 + Math.random() * 200) + "deg;" +
+              "--peak:" + (0.45 + Math.random() * 0.35).toFixed(2) + ";";
+            field.appendChild(petal);
+          }
+          el.appendChild(field);
+        }
+
+        // The app tells the curtain it has mounted; the curtain tells the app
+        // when it is lifting, which is when Lenis may start scrolling again.
+        window.SakuraPreloader = { ready: appReady, lifted: lifted };
+        requestAnimationFrame(frame);
+      })();
+    </script>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

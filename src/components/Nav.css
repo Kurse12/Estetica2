@@ -1,0 +1,245 @@
+.site-nav {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 40;
+  /* Over the hero the bar is nothing at all: no fill, no blur, no rule. The
+     photo runs edge to edge and full height, and the only thing between it and
+     the viewer is the type. Past the hero the bar goes fully opaque. There is
+     no glassy state in between, which is why no backdrop-filter survives
+     anywhere in its life — a blur samples everything behind it again on every
+     frame the page moves, and this bar is over moving content the whole time.
+     The border is declared transparent rather than left out so the bar's height
+     doesn't change by a pixel when it turns solid. */
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease,
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* is-solid, not is-scrolled: the trigger is the dome covering the top of the
+   viewport, not the first pixel of scroll. See Nav.jsx. */
+.site-nav.is-solid {
+  background: var(--cream);
+  border-bottom-color: var(--cream-line);
+  box-shadow: 0 8px 24px -18px rgba(74, 63, 56, 0.25);
+}
+
+.site-nav__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  /* max() against the safe-area inset so the bar clears the notch in landscape
+     rather than tucking the wordmark under it. */
+  padding: 1.1rem max(clamp(1.25rem, 4vw, 3.5rem), env(safe-area-inset-right))
+    1.1rem max(clamp(1.25rem, 4vw, 3.5rem), env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.site-nav__brand {
+  display: flex;
+  align-items: center;
+  color: var(--taupe);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+/* The mark sits a few degrees off-axis at rest and rights itself on hover —
+   the one place the logo moves, and only in response to the pointer. */
+.site-nav__brand:hover .brand-logo__mark {
+  transform: rotate(0deg) scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo__mark {
+    transition: none;
+  }
+}
+
+.site-nav__links {
+  display: flex;
+  gap: 1.75rem;
+  flex: 1;
+}
+
+.site-nav__link {
+  position: relative;
+  text-decoration: none;
+  color: var(--taupe-soft);
+  font-size: var(--fs-small);
+  padding-bottom: 0.3rem;
+  transition: color 0.2s ease;
+}
+.site-nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 0;
+  height: 1.5px;
+  background: var(--cherry);
+  transition: right 0.25s ease;
+}
+.site-nav__link:hover {
+  color: var(--taupe);
+}
+.site-nav__link.is-active {
+  color: var(--taupe);
+}
+.site-nav__link.is-active::after {
+  right: 0;
+}
+
+.site-nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.lang-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-label);
+  color: var(--taupe-soft);
+  /* Opaque even while the bar itself is transparent over the hero — the pill
+     needs its own guaranteed ground, since the photo behind it runs from pale
+     blossom to dark bark and a transparent chip inherits whichever one lands
+     under the letters. */
+  background: var(--cream);
+  border: 1.5px solid var(--cream-line);
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.lang-pill:hover {
+  background: var(--sakura-pale);
+  border-color: var(--sakura);
+}
+
+.site-nav__cta {
+  text-decoration: none;
+  color: var(--white);
+  background: var(--cherry);
+  padding: 0.65rem 1.3rem;
+  border-radius: 999px;
+  font-size: var(--fs-body);
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.site-nav__cta:hover {
+  background: var(--cherry-ink);
+  transform: translateY(-1px);
+}
+
+/* A phone gives this bar 132px of a 667px viewport — a fifth of the screen,
+   permanently, for four links and a button. So on a phone it earns its keep by
+   leaving: it slides up the moment the visitor scrolls down into the page, and
+   comes back on the first upward flick, which is where a thumb reaches for
+   navigation anyway. It never tucks over the hero, where it is the only
+   chrome the page has, and never under reduced motion. */
+@media (max-width: 760px) {
+  /* The full chrome, not -100%: the bar's own box is one row, and the link
+     strip is absolutely positioned below it, so -100% slid the bar out and left
+     the links sitting at the top of the screen. --nav-height is what the two
+     actually occupy together. */
+  .site-nav.is-tucked {
+    transform: translateY(calc(var(--nav-height) * -1));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav {
+    transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .site-nav.is-tucked {
+    transform: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .site-nav__inner {
+    gap: 1rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+  /* Only the mark and the name survive at this width; the italic tail would
+     wrap the bar to two lines for a word the mark already says. */
+  .site-nav__brand .brand-logo__name {
+    font-size: 1.15rem;
+  }
+  .site-nav__brand .brand-logo__tail {
+    display: none;
+  }
+  .site-nav__links {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    /* The links hang below the bar as their own strip, so they follow it:
+       invisible over the hero, opaque past it. The mobile scrim is a near-solid
+       veil over the whole photo, so the links are on cream either way. */
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    padding: 0 max(clamp(1.25rem, 4vw, 3.5rem), env(safe-area-inset-right)) 0
+      max(clamp(1.25rem, 4vw, 3.5rem), env(safe-area-inset-left));
+    gap: 1.35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+  .site-nav.is-solid .site-nav__links {
+    background: var(--cream);
+    border-bottom-color: var(--cream-line);
+  }
+  .site-nav__links::-webkit-scrollbar {
+    display: none;
+  }
+  /* 44px tall, reached by growing the link rather than the strip: the row is
+     the same height it was, and the target is no longer a 27px sliver. The
+     underline follows the text down instead of sitting on the padded edge. */
+  .site-nav__link {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding-bottom: 0;
+    font-size: var(--fs-small);
+  }
+  .site-nav__link::after {
+    bottom: 0.6rem;
+  }
+  .lang-pill {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Touch and stylus, at any width: a fine pointer can hit a 27px link, a thumb
+   cannot. Keyed off the input device rather than the viewport, so a touchscreen
+   laptop gets the same targets a phone does. */
+@media (pointer: coarse) {
+  .site-nav__link {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding-bottom: 0;
+  }
+  .site-nav__link::after {
+    bottom: 0.6rem;
+  }
+  .lang-pill {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* A tucked bar that still holds focus is a trap: tabbing into it would move
+   focus to something off-screen. Any focus inside brings it straight back. */
+@media (max-width: 760px) {
+  .site-nav.is-tucked:focus-within {
+    transform: none;
+  }
+}

@@ -1,0 +1,871 @@
+/* background-COLOR, not the shorthand — see the note in Services.css. */
+.booking-section {
+  background-color: var(--cream-deep);
+}
+
+.booking-section__petals {
+  /* Behind the card, in front of the ground texture. The layer's own
+     overflow:hidden crops whatever petal is still in the air at the section's
+     bottom edge, so the fall never leaks into the footer. */
+  z-index: 0;
+}
+
+.booking-section__branch {
+  bottom: -3rem;
+  right: -7rem;
+  opacity: 0.26;
+}
+
+@media (max-width: 900px) {
+  .booking-section__branch {
+    bottom: -2rem;
+    right: -5rem;
+  }
+}
+
+.booking-subtitle {
+  color: var(--taupe-soft);
+  max-width: 52ch;
+  margin-top: 0.6rem;
+  font-size: var(--fs-body-lg);
+}
+
+.booking-note {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: var(--fs-small);
+  /* Taupe, not sage-deep: this is the one line that has to be read, and
+     sage-deep on sage-pale lands at 3.2:1, under AA for text this size. */
+  color: var(--taupe);
+  background: var(--sage-pale);
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  width: fit-content;
+  margin-top: 1.1rem;
+}
+
+.booking-card {
+  position: relative;
+  z-index: 1;
+  margin-top: 2.5rem;
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-deep);
+  overflow: hidden;
+}
+
+/* A standing choice, not a step — set apart from the wizard below it by its
+   own cream ground and a hairline rule, the same visual language the card
+   already uses to separate the step list from the panel. */
+.booking-branch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  background: var(--cream);
+  border-bottom: 1px solid var(--cream-line);
+  padding: 1rem clamp(1.25rem, 4vw, 2.5rem);
+}
+.booking-branch__label {
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--taupe-soft);
+  flex-shrink: 0;
+}
+.booking-branch__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.booking-branch__pill {
+  min-height: 44px;
+  padding: 0.4rem 1rem;
+  background: var(--white);
+  border: 1.5px solid var(--cream-line);
+  border-radius: 999px;
+  color: var(--taupe-soft);
+  font-size: var(--fs-small);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.booking-branch__pill:hover {
+  border-color: var(--sakura);
+}
+.booking-branch__pill.is-selected {
+  background: var(--cherry);
+  border-color: var(--cherry);
+  color: var(--white);
+}
+.booking-branch__hours {
+  margin: 0 0 0 auto;
+  font-size: var(--fs-label);
+  color: var(--taupe-soft);
+}
+
+/* Warns before the fact, not after: switching branch silently clears any
+   professional/date already picked (see pickBranch in Booking.jsx), so the
+   one line that explains why lives right where the choice is made. */
+.booking-branch__hint {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: var(--fs-micro);
+  color: var(--taupe-soft);
+}
+
+@media (max-width: 560px) {
+  .booking-branch__hours {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+.booking-steps {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 1.5rem clamp(1.25rem, 4vw, 2.5rem) 0;
+  gap: 0.5rem;
+}
+
+.booking-step {
+  flex: 1;
+  min-width: 0;
+}
+.booking-step button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--taupe-soft);
+  font-size: var(--fs-label);
+  padding: 0 0 1.1rem;
+  border-bottom: 2px solid var(--cream-line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.booking-step button:disabled {
+  cursor: default;
+}
+.booking-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--cream-line);
+  color: var(--taupe-soft);
+  font-size: var(--fs-micro);
+}
+.booking-step.is-active button {
+  color: var(--taupe);
+  border-bottom-color: var(--sakura-deep);
+}
+.booking-step.is-active .booking-step__num {
+  background: var(--cherry);
+  color: var(--white);
+}
+.booking-step.is-done button {
+  color: var(--sage-deep);
+}
+.booking-step.is-done .booking-step__num {
+  background: var(--sage-deep);
+  color: var(--white);
+}
+
+.booking-panel {
+  padding: 2rem clamp(1.25rem, 4vw, 2.5rem);
+  min-height: 280px;
+}
+
+.pick-grid h3,
+.date-picker h3,
+.review-panel h3 {
+  font-size: var(--fs-title-lg);
+  margin-bottom: 1.25rem;
+}
+
+/* Sits between the step heading and the options, so the rule that shapes the
+   list is read before the list, not discovered by a dead click. */
+.pick-grid__hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  max-width: 56ch;
+  margin: -0.85rem 0 1.15rem;
+}
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--cherry);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.link-button:hover {
+  color: var(--cherry-ink);
+}
+
+/* 260px, not 210px: at the card's full width that keeps professional and
+   service choices to four columns instead of five-plus, so a visitor scans
+   one row of options rather than a wall of them. */
+.pick-grid__options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.9rem;
+}
+
+.pick-pro {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem;
+  background: var(--cream);
+  border: 2px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+.pick-pro img {
+  border-radius: 50%;
+  object-fit: cover;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+.pick-pro span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+}
+.pick-pro strong {
+  color: var(--taupe);
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+.pick-pro:hover {
+  transform: translateY(-2px);
+}
+.pick-pro.is-selected {
+  border-color: var(--sakura-deep);
+  background: var(--sakura-pale);
+}
+/* Unavailable is stated, not dimmed: the card keeps full contrast and says
+   why in the line that used to hold the specialty. Only the portrait fades,
+   because a greyed face reads as "not this one" faster than any label. */
+.pick-pro:disabled {
+  background: var(--cream-deep);
+  border-color: var(--cream-deep);
+  cursor: not-allowed;
+}
+.pick-pro:disabled:hover {
+  transform: none;
+}
+.pick-pro:disabled img {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+.pick-pro:disabled strong {
+  color: var(--taupe-soft);
+}
+.pick-pro:disabled small {
+  font-style: italic;
+}
+
+.pick-service {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--cream);
+  border: 2px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  color: var(--sage-deep);
+  transition: border-color 0.2s ease, transform 0.15s ease;
+}
+.pick-service:hover {
+  transform: translateY(-2px);
+}
+.pick-service.is-selected {
+  border-color: var(--sakura-deep);
+  background: var(--sakura-pale);
+}
+.pick-service__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  color: var(--taupe);
+}
+.pick-service__price {
+  font-size: var(--fs-body);
+  color: var(--sakura-deep);
+  font-weight: 600;
+}
+
+.date-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+.date-strip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.date-strip__month {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  color: var(--taupe);
+}
+.date-strip__nav {
+  display: flex;
+  gap: 0.4rem;
+}
+.date-strip__arrow {
+  flex-shrink: 0;
+  background: var(--cream-line);
+  color: var(--taupe);
+  border: none;
+  border-radius: 50%;
+  /* 44px, not 34: this is the control that reaches next week, and a thumb is
+     the input that reaches for it most. */
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.date-strip__days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.date-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 44px;
+  padding: 0.6rem 0.3rem;
+  background: var(--cream);
+  border: 2px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  color: var(--taupe);
+}
+.date-chip__dow {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  color: var(--taupe-soft);
+}
+.date-chip__num {
+  font-size: var(--fs-body-lg);
+  font-family: var(--font-display);
+}
+.date-chip.is-selected {
+  border-color: var(--cherry);
+  background: var(--cherry);
+  color: var(--white);
+}
+.date-chip.is-selected .date-chip__dow {
+  color: var(--sakura-pale);
+}
+.date-chip.is-unavailable {
+  background: var(--cream-deep);
+  border-color: var(--cream-deep);
+  color: var(--taupe-soft);
+  cursor: not-allowed;
+}
+.date-chip.is-unavailable .date-chip__dow {
+  color: var(--taupe-soft);
+}
+/* The reason, spelled out under the number. A past or closed day that only
+   went pale would read as a rendering accident. */
+.date-chip__badge {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--taupe-soft);
+}
+.date-strip__arrow:disabled {
+  background: var(--cream);
+  color: var(--taupe-soft);
+  cursor: not-allowed;
+}
+
+.slot-groups {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.slot-group__label {
+  display: block;
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--taupe-soft);
+  margin-bottom: 0.5rem;
+}
+.slot-group__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.slot-btn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 1.05rem;
+  background: var(--cream);
+  border: 2px solid var(--cream-line);
+  border-radius: 999px;
+  color: var(--taupe);
+  font-size: var(--fs-small);
+}
+.slot-btn:disabled {
+  background: var(--cream-deep);
+  border-color: var(--cream-deep);
+  color: var(--taupe-soft);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+.slot-btn.is-selected {
+  background: var(--cherry);
+  border-color: var(--cherry);
+  color: var(--white);
+}
+.slot-empty {
+  font-size: var(--fs-body);
+  color: var(--taupe-soft);
+  font-style: italic;
+}
+
+.review-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.1rem;
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--cream-line);
+}
+.review-list dt {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--taupe-soft);
+}
+.review-list dd {
+  margin: 0.25rem 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.review-contact__title {
+  font-size: var(--fs-body);
+  margin: 0 0 0.3rem;
+}
+.review-contact__hint {
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  max-width: 48ch;
+  margin: 0 0 1.1rem;
+}
+
+/* The error voice is cherry-ink, never a foreign red: graver and darker than
+   the cherry that means "selected", so the two can never be confused, and
+   always paired with the ring icon so the state is not carried by color. */
+.review-error-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--fs-small);
+  color: var(--cherry-ink);
+  background: var(--sakura-pale);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.9rem;
+  margin: 0 0 1.1rem;
+}
+
+.review-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem 1.1rem;
+}
+.review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.review-field label {
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+}
+.review-field input {
+  width: 100%;
+  min-width: 0;
+  font-family: var(--font-body);
+  /* 16px exactly: iOS Safari force-zooms any focused input below it, which
+     would throw the whole card off-screen mid-booking. */
+  font-size: var(--fs-body);
+  padding: 0.7rem 0.9rem;
+  border: 2px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  color: var(--taupe);
+}
+.review-field input::placeholder {
+  color: var(--taupe-soft);
+}
+.review-field input:focus-visible {
+  border-color: var(--cherry);
+}
+.review-field.has-error input {
+  border-color: var(--cherry-ink);
+  background: var(--blush);
+}
+.review-field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: var(--fs-small);
+  color: var(--cherry-ink);
+  margin: 0;
+}
+.review-error-summary svg,
+.review-field__error svg {
+  flex-shrink: 0;
+  margin-top: 0.1em;
+}
+
+.booking-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem clamp(1.25rem, 4vw, 2.5rem);
+  border-top: 1px solid var(--cream-line);
+}
+.booking-nav__spacer {
+  flex: 1;
+}
+.booking-nav__next-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+.booking-nav__hint {
+  font-size: var(--fs-label);
+  color: var(--taupe-soft);
+  text-align: right;
+  max-width: 24ch;
+}
+.booking-nav__back,
+.booking-nav__next,
+.booking-nav__confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--fs-body);
+  padding: 0.75rem 1.3rem;
+  border-radius: 999px;
+  border: none;
+}
+.booking-nav__back {
+  background: none;
+  color: var(--taupe-soft);
+}
+.booking-nav__next {
+  background: var(--cherry);
+  color: var(--white);
+}
+.booking-nav__next:disabled {
+  /* Not a dimmed cherry: cherry at low opacity thins to a pale pink that
+     drops its own white label under 2:1. A flat muted fill keeps the label
+     legible while still reading as inert. */
+  background: var(--cream-line);
+  color: var(--taupe-soft);
+  cursor: not-allowed;
+}
+.booking-nav__confirm {
+  background: var(--cherry);
+  color: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+.booking-nav__confirm:hover {
+  background: var(--cherry-ink);
+}
+
+/* --- Confirmation: the signature interaction --- */
+.confirmed-wrap {
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.confirmed-card {
+  width: min(480px, 100%);
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-deep);
+  padding: 2.5rem clamp(1.25rem, 5vw, 2.5rem) 2.5rem;
+  text-align: center;
+  animation: card-rise 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.confirmed-card .sakura-divider {
+  margin-bottom: 0.25rem;
+}
+
+.confirmed-card__bloom {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 86px;
+  height: 86px;
+  animation: bloom-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+/* The petals unfurl a quarter-turn as they scale up; the tick fades in over
+   them once they have settled, so the flower opens first and the confirmation
+   lands second. */
+.confirmed-card__blossom {
+  position: absolute;
+  inset: 0;
+  animation: petal-open 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.confirmed-card__heart {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--cherry);
+  color: var(--white);
+  animation: check-settle 0.45s ease 0.55s both;
+}
+
+@keyframes petal-open {
+  0% {
+    transform: scale(0.3) rotate(-72deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes check-settle {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .confirmed-card__bloom,
+  .confirmed-card__blossom,
+  .confirmed-card__heart {
+    animation: none;
+  }
+}
+
+@keyframes bloom-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.confirmed-card h3 {
+  font-size: 1.5rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.confirmed-card__subtitle {
+  color: var(--taupe-soft);
+  font-size: var(--fs-body);
+  max-width: 40ch;
+  margin: 0 auto 1.75rem;
+}
+
+.confirmed-card__panel {
+  text-align: left;
+  border-radius: var(--radius-sm);
+  padding: 1.4rem 1.5rem;
+  background: var(--cream-deep);
+}
+
+.confirmed-card__panel-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: var(--fs-body-lg);
+  color: var(--cherry);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--cream-line);
+}
+
+.confirmed-card__details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+.confirmed-card__details dt {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--taupe-soft);
+}
+.confirmed-card__details dd {
+  margin: 0.2rem 0 0;
+  font-weight: 600;
+  /* An email or a 60-character name must wrap inside the card, not widen it. */
+  overflow-wrap: anywhere;
+}
+.confirmed-card__details-wide {
+  grid-column: 1 / -1;
+}
+
+.confirmed-card__footnote {
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  margin: 1.5rem 0 1.2rem;
+}
+
+/* The heading takes focus when the card replaces the wizard, so a keyboard
+   visitor is not dropped on <body>. It is not a control and cannot be tabbed
+   to, so the ring would only read as a stray box around the headline. */
+.confirmed-card h3:focus-visible {
+  outline: none;
+}
+
+.confirmed-card__reset {
+  background: var(--cherry);
+  color: var(--white);
+  border: none;
+  font-size: var(--fs-body);
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
+}
+.confirmed-card__reset:hover {
+  background: var(--cherry-ink);
+}
+
+@media (max-width: 560px) {
+  .booking-steps {
+    gap: 0.4rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  /* Numbers only. Four labels sharing a 375px row rendered at 9.92px, which is
+     not a small label but an unreadable one — and the panel's own heading below
+     already names the step in full, so nothing is lost by dropping them here.
+     They stay in the accessibility tree, so the buttons keep their names. */
+  .booking-step__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .booking-step button {
+    padding-bottom: 0.9rem;
+  }
+  .booking-step__num {
+    width: 1.9rem;
+    height: 1.9rem;
+    font-size: var(--fs-small);
+  }
+}
+
+@media (max-width: 640px) {
+  /* The stadium ends only read as a pill while the text is one line. At phone
+     widths this notice runs to three, so it becomes a panel — the shape follows
+     the copy rather than the copy being squeezed to keep the shape. */
+  .booking-note {
+    align-items: flex-start;
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1rem;
+  }
+  .booking-note svg {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
+  /* Seven columns across a phone gave each day 32px — too narrow for the word
+     the closed and past days have to carry, and too narrow for a thumb. The
+     week becomes a snapping scroller instead: full-size chips, five or so in
+     view, and the arrows above still page a week at a time. */
+  .date-strip__days {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* Room for the focus ring, which would otherwise be clipped by the scroller. */
+    padding: 4px;
+    margin: -4px;
+  }
+  .date-strip__days::-webkit-scrollbar {
+    display: none;
+  }
+  .date-chip {
+    flex: 0 0 60px;
+    scroll-snap-align: start;
+    padding: 0.5rem 0.2rem;
+  }
+  .confirmed-card__details {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Behind the booking card and in front of the ground texture, matching the
+   fall's own layer — the two are the same weather, one landed. */
+.booking-section__fallen {
+  inset: 8% 0 6% 0;
+}

@@ -1,0 +1,89 @@
+:root {
+  /* ---- Ground -------------------------------------------------------
+     The cream drifts toward blush: this is petal-paleness, not paper.
+     Every surface in the site is one of these three. */
+  --cream: #fdf7f6;
+  --cream-deep: #f9ecea;
+  --cream-line: #f0dcda;
+  --blush: #fcf1f2;
+
+  /* ---- Sakura: the primary, not an accent --------------------------
+     A five-step rose ramp from petal-edge to the dark heart of a
+     late-season blossom. --cherry is the ink/CTA weight (AA on white);
+     --sakura-deep is the decorative mid; the pales are surfaces. */
+  --sakura-pale: #fae6ea;
+  --sakura: #f0c2cd;
+  --sakura-mid: #e29fb1;
+  --sakura-deep: #c2657f;
+  --cherry: #a8455f;
+  --cherry-ink: #7d3145;
+
+  /* Branch and bark — the woody counterweight that keeps the pink from
+     going saccharine. Used for line-art watermarks and hairlines. */
+  --branch: #9b7468;
+  --branch-soft: #c2a79d;
+
+  /* ---- Sage: the quiet second voice -------------------------------- */
+  --sage: #a3b48f;
+  --sage-deep: #74855f;
+  --sage-pale: #e4e9dc;
+
+  --taupe: #46383a;
+  --taupe-soft: #7a6660;
+
+  --gold: #b99a63;
+  --gold-light: #ddc38f;
+
+  --white: #ffffff;
+
+  --font-display: "Libre Caslon Display", Georgia, "Times New Roman", serif;
+  --font-emphasis: "Libre Caslon Text", Georgia, serif;
+  --font-body: "Work Sans", -apple-system, "Segoe UI", sans-serif;
+
+  /* ---- Type scale -----------------------------------------------------
+     Display and headline stay fluid clamps at their call sites (hero, section
+     kickers); everything below them resolves to one of these five steps.
+     --fs-label/--fs-small are the documented label role's pinned mid and
+     ceiling (DESIGN.md: "0.65-0.85rem"); --fs-body/--fs-body-lg match the
+     documented body role (17px floor, 1.05rem in copy blocks); --fs-title
+     matches the documented title role's 1.2rem pin, --fs-title-lg its
+     1.3rem ceiling. */
+  --fs-micro: 0.7rem;
+  --fs-label: 0.78rem;
+  --fs-small: 0.85rem;
+  --fs-body: 1rem;
+  --fs-body-lg: 1.05rem;
+  --fs-title: 1.2rem;
+  --fs-title-lg: 1.3rem;
+
+  --shadow-soft: 0 10px 30px -14px rgba(125, 49, 69, 0.2);
+  --shadow-deep: 0 24px 60px -20px rgba(125, 49, 69, 0.26);
+
+  --radius: 18px;
+  --radius-sm: 10px;
+  --radius-arch: 999px 999px 12px 12px;
+
+  /* What the fixed bar actually occupies, which is what every anchor has to
+     clear. Measured, not guessed: one row on a desktop, two on a phone, since
+     the link strip hangs below the bar there. Read by scroll-margin-top in
+     global.css and, through it, by the smooth-scroll module. */
+  --nav-height: 80px;
+
+  /* ---- Petal fall ---------------------------------------------------
+     A tileable drift of fallen petals, laid under whole sections as the site's
+     ambient ground texture. Deliberately sparse — six petals per 320px tile at
+     0.11 alpha. Denser or darker than this and it stops being ground and starts
+     being wallpaper that body copy has to be read against. */
+  --petal-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cg fill='%23e0a0b2' fill-opacity='0.11'%3E%3Cpath d='M2 22C2 10.9 10.9 2 22 2 22 13.1 13.1 22 2 22Z' transform='translate(24 40) rotate(15) scale(0.7)'/%3E%3Cpath d='M2 22C2 10.9 10.9 2 22 2 22 13.1 13.1 22 2 22Z' transform='translate(210 26) rotate(-42) scale(0.5)'/%3E%3Cpath d='M2 22C2 10.9 10.9 2 22 2 22 13.1 13.1 22 2 22Z' transform='translate(130 140) rotate(68) scale(0.85)'/%3E%3Cpath d='M2 22C2 10.9 10.9 2 22 2 22 13.1 13.1 22 2 22Z' transform='translate(280 200) rotate(124) scale(0.58)'/%3E%3Cpath d='M2 22C2 10.9 10.9 2 22 2 22 13.1 13.1 22 2 22Z' transform='translate(58 236) rotate(-68) scale(0.68)'/%3E%3Cpath d='M2 22C2 10.9 10.9 2 22 2 22 13.1 13.1 22 2 22Z' transform='translate(196 290) rotate(28) scale(0.46)'/%3E%3C/g%3E%3C/svg%3E");
+
+  color-scheme: light;
+}
+
+@media (max-width: 760px) {
+  /* Two rows: the bar plus the link strip that hangs below it. Rounded up past
+     the measured 116.7px so the tuck clears the strip's bottom border rather
+     than leaving a hairline of it on screen. */
+  :root {
+    --nav-height: 118px;
+  }
+}

@@ -1,0 +1,113 @@
+.site-footer {
+  position: relative;
+  overflow: hidden;
+  background: var(--cream-deep);
+  background-image: var(--petal-texture);
+  padding: clamp(3rem, 7vw, 4.5rem)
+    max(clamp(1.25rem, 5vw, 3.5rem), env(safe-area-inset-right))
+    max(2rem, env(safe-area-inset-bottom))
+    max(clamp(1.25rem, 5vw, 3.5rem), env(safe-area-inset-left));
+  border-top: 1px solid var(--branch-soft);
+}
+
+/* Pulled up and out so the bough passes above the stacked lockup rather than
+   through it — its own blossoms would otherwise read as part of the logo. */
+.site-footer__branch {
+  top: -6rem;
+  left: -9rem;
+  opacity: 0.26;
+}
+
+.site-footer__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr 1fr;
+  }
+  .site-footer__brand {
+    grid-column: 1 / -1;
+  }
+}
+
+/* The stacked lockup is centred inside its own column rather than flush left:
+   the mark, the tracked wordmark, and the hairline rules read as one seal. */
+.site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  padding-right: 1.5rem;
+}
+
+.site-footer__tagline {
+  font-family: var(--font-emphasis);
+  font-style: italic;
+  font-size: var(--fs-body);
+  color: var(--taupe-soft);
+  margin: 0;
+  max-width: 26ch;
+}
+
+.site-footer__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cherry);
+  font-weight: 600;
+}
+
+.site-footer__col p {
+  margin: 0.6rem 0 0;
+  color: var(--taupe-soft);
+  font-size: var(--fs-body);
+}
+
+.site-footer__col p a {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+  /* Padded out to a real touch target and pulled back flush, the same trick
+     the map's own phone link uses, so two stacked lines don't crowd a thumb. */
+  padding: 0.4rem 0;
+  margin: -0.4rem 0;
+}
+.site-footer__col p a:hover {
+  color: var(--cherry);
+}
+
+.site-footer__rule {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 2.5rem auto 1.25rem;
+  border-top: 1px solid var(--branch-soft);
+}
+
+.site-footer__rights {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-size: var(--fs-label);
+  color: var(--taupe-soft);
+}
+
+/* Six only, and low: the footer's own bough sweeps the top-left, and the
+   columns of small type below want a quiet ground, not a busy one. */
+.site-footer__fallen {
+  inset: 22% 0 0 0;
+  opacity: 0.75;
+}

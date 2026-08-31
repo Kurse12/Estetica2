@@ -1,0 +1,195 @@
+.carousel3d {
+  position: relative;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.carousel3d-stage {
+  position: relative;
+  width: 100%;
+  /* Sized off the panel rather than the viewport: the panels are now large
+     enough that a fixed stage height either cropped them or left dead air. The
+     headroom covers the perspective enlargement the front panel picks up as it
+     swings toward the camera. */
+  height: calc(var(--c3d-item-h) * 1.7);
+  perspective: var(--c3d-persp, 1500px);
+  perspective-origin: 50% 50%;
+  cursor: grab;
+  touch-action: pan-y;
+  /* Barely a mask now. The reference lets its panels run clean off the edge of
+     the page; here the ring sits inside a dome, so the fade only softens the
+     hard cut where a panel meets the section's rounded corner. */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 7%,
+    #000 93%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 7%,
+    #000 93%,
+    transparent 100%
+  );
+}
+
+.carousel3d-stage:active {
+  cursor: grabbing;
+}
+
+.carousel3d-tilt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+}
+
+.carousel3d-ring {
+  position: relative;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.carousel3d-item-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: calc(var(--c3d-item-w) / -2);
+  margin-top: calc(var(--c3d-item-h) / -2);
+  width: var(--c3d-item-w);
+  height: var(--c3d-item-h);
+  /* Left visible on purpose. Hiding backfaces made the far half of the ring
+     disappear, which on an over-packed ring is most of it; showing them means a
+     panel that has turned past side-on reads as a real sheet seen from behind,
+     mirrored image and all. */
+  backface-visibility: visible;
+}
+
+.carousel3d-item {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 3px solid var(--white);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--cream-deep);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.carousel3d-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.carousel3d-controls {
+  /* A fixed three-column track, not a centred flex row. The caption changes
+     length on every slide, and in a flex row that width was part of the
+     centring maths: both arrows slid a few pixels outward or inward each step,
+     right out from under a cursor that was clicking through the ring. The
+     centre column is a fixed size instead, so each arrow keeps one x position
+     for the whole rotation whatever word is under it. */
+  --c3d-arrow: 50px;
+  --c3d-caption-w: 20rem;
+  display: grid;
+  grid-template-columns: var(--c3d-arrow) minmax(0, var(--c3d-caption-w)) var(--c3d-arrow);
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.75rem;
+}
+
+.carousel3d-arrow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--c3d-arrow);
+  height: var(--c3d-arrow);
+  border-radius: 999px;
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--taupe);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.carousel3d-arrow:hover {
+  background: var(--sakura-pale);
+  border-color: var(--sakura);
+  color: var(--sakura-deep);
+  transform: translateY(-1px);
+}
+
+.carousel3d-arrow:active {
+  transform: translateY(0);
+}
+
+.carousel3d-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Overrides the grid item's auto minimum, which would otherwise let a long
+     caption stretch the centre column and move the arrows again. */
+  min-width: 0;
+  text-align: center;
+}
+
+.carousel3d-caption span:first-child {
+  /* Real italic, not a synthesised oblique: Libre Caslon Display only loads
+     upright, so italic here has to be the Text face, same as every other
+     emphasis word in the system. */
+  font-family: var(--font-emphasis);
+  font-style: italic;
+  font-size: var(--fs-title-lg);
+  color: var(--taupe);
+  /* Kept on one line so the row's height is constant too — a caption that
+     wrapped would push the arrows vertically the same way its width used to
+     push them sideways. It is clipped rather than allowed to spill, so an
+     unexpectedly long caption can't reach the buttons. */
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carousel3d-count {
+  font-family: var(--font-body);
+  font-size: var(--fs-label);
+  letter-spacing: 0.1em;
+  color: var(--taupe-soft);
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 640px) {
+  /* The arrows keep their size and the caption gives up the width instead: a
+     phone is the one device where these are pressed by a thumb, so shrinking
+     them to 38px there had it exactly backwards. */
+  .carousel3d-controls {
+    --c3d-arrow: 44px;
+    --c3d-caption-w: 11rem;
+    gap: 0.9rem;
+  }
+
+  .carousel3d-caption span:first-child {
+    font-size: var(--fs-body-lg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel3d-stage {
+    cursor: default;
+  }
+}

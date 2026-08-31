@@ -1,0 +1,220 @@
+/* ---------------------------------------------------------------------------
+   Logo
+   --------------------------------------------------------------------------- */
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  line-height: 1;
+  color: var(--taupe);
+}
+
+.brand-logo__mark {
+  flex-shrink: 0;
+  /* The mark leans a few degrees off-axis so it reads as a picked blossom
+     rather than a stamped icon. It rights itself on hover of the nav brand. */
+  transform: rotate(-8deg);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-logo__type {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.brand-logo__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  letter-spacing: 0.02em;
+}
+
+.brand-logo__tail {
+  font-family: var(--font-emphasis);
+  font-style: italic;
+  font-size: var(--fs-label);
+  color: var(--cherry);
+  letter-spacing: 0.16em;
+  text-transform: lowercase;
+}
+
+/* Stacked: the signature lockup — mark centred over a tracked wordmark, with
+   the italic tail hung under it between two gold hairlines. */
+.brand-logo--stacked {
+  flex-direction: column;
+  gap: 0.7rem;
+  text-align: center;
+}
+
+.brand-logo--stacked .brand-logo__type {
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.brand-logo--stacked .brand-logo__name {
+  font-size: 1.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brand-logo--stacked .brand-logo__tail {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: var(--fs-small);
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+}
+
+.brand-logo--stacked .brand-logo__tail::before,
+.brand-logo--stacked .brand-logo__tail::after {
+  content: "";
+  width: 26px;
+  height: 1px;
+  background: var(--gold-light);
+}
+
+/* ---------------------------------------------------------------------------
+   Branch watermark
+   --------------------------------------------------------------------------- */
+.branch-watermark {
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  width: clamp(320px, 46vw, 620px);
+  opacity: 0.4;
+}
+
+.branch-watermark--flip {
+  transform: scaleX(-1);
+}
+
+.branch-watermark svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .branch-watermark {
+    opacity: 0.28;
+    width: clamp(260px, 78vw, 420px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Section divider
+   --------------------------------------------------------------------------- */
+.sakura-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  margin: 0 auto;
+}
+
+.sakura-divider--gap {
+  padding: 1.75rem 0;
+  background: var(--cream-line);
+  background-image: var(--petal-texture);
+}
+
+.sakura-divider__blossom {
+  position: absolute;
+  top: 50%;
+}
+.sakura-divider__blossom--a {
+  left: calc(50% + 12px);
+  transform: translateY(-62%) rotate(-8deg);
+}
+.sakura-divider__blossom--b {
+  left: calc(50% - 36px);
+  transform: translateY(-38%) rotate(14deg);
+}
+.sakura-divider__blossom--c {
+  left: calc(50% + 44px);
+  transform: translateY(-20%) rotate(-24deg);
+}
+
+/* ---------------------------------------------------------------------------
+   Falling petals
+   --------------------------------------------------------------------------- */
+/* A section-bounded petal layer. Percentage translations resolve against the
+   petal's own 10px box, not its container, so the fall distance is a token the
+   host section overrides instead — this layer's overflow:hidden crops whatever
+   is still in the air at its bottom edge. */
+.falling-petals {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+  --fall-span: 115vh;
+}
+
+.falling-petals__petal {
+  position: absolute;
+  top: -5%;
+  background: var(--sakura);
+  border-radius: 100% 0 100% 0;
+  animation-name: petal-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  --peak-opacity: 0.75;
+  --spin: 220deg;
+}
+
+@keyframes petal-fall {
+  0% {
+    transform: translate3d(0, -10%, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: var(--peak-opacity);
+  }
+  92% {
+    opacity: calc(var(--peak-opacity) * 0.8);
+  }
+  100% {
+    transform: translate3d(calc(var(--drift) * 50px), var(--fall-span), 0) rotate(calc(var(--drift) * var(--spin)));
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Fallen petals
+   --------------------------------------------------------------------------- */
+/* Sits under the section's content (.section carries z-index 1) and behind the
+   fall, so a landed petal never crosses in front of one still in the air.
+   --sakura-mid rather than --sakura: these lie on --cream-line in every section
+   that uses them, and the paler step is close enough to that ground to vanish. */
+.petal-scatter {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.petal-scatter__petal {
+  position: absolute;
+  display: block;
+  background: var(--scatter-tone, var(--sakura-mid));
+  border-radius: 100% 0 100% 0;
+}
+
+/* Nothing here animates, so there is nothing for reduced motion to turn off —
+   which is the other reason to spend the page's density budget on these rather
+   than on more of the fall: they are the version everyone sees. */
+
+@media (max-width: 900px) {
+  /* Half the fall on a phone. display:none is the point rather than opacity or
+     visibility: an element that isn't rendered doesn't run its animation, so
+     these petals stop costing the compositor anything at all — which is where
+     the budget was going on exactly the devices that could least afford it.
+     The scatter underneath is what keeps the surface from thinning out. */
+  .falling-petals__petal:nth-child(2n) {
+    display: none;
+  }
+}

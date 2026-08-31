@@ -1,0 +1,182 @@
+/* background-COLOR, not the shorthand: .petal-ground supplies the fallen-petal
+   background-image, and the shorthand would reset it out from under the utility
+   depending on which stylesheet the bundler emits first. */
+.services-section {
+  background-color: var(--cream);
+}
+
+/* Every section's heading sits top-left, so no bough is allowed to enter from
+   that corner — they come in from the other three, one per section, so the
+   sequence never repeats the same silhouette in the same place. */
+.services-section__branch {
+  bottom: -1rem;
+  left: -7rem;
+  opacity: 0.3;
+}
+
+@media (max-width: 900px) {
+  .services-section__branch {
+    bottom: -1rem;
+    left: -5rem;
+  }
+}
+
+.services-subtitle {
+  color: var(--taupe-soft);
+  max-width: 52ch;
+  margin-top: 0.6rem;
+  font-size: var(--fs-body-lg);
+}
+
+.price-list {
+  list-style: none;
+  margin: 2.75rem 0 0;
+  padding: 0;
+}
+
+.price-row {
+  border-bottom: 1px solid var(--branch-soft);
+}
+.price-row:first-child {
+  border-top: 1px solid var(--branch-soft);
+}
+
+.price-row__button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  background: none;
+  border: none;
+  padding: 1.3rem 0.5rem;
+  text-align: left;
+  color: var(--taupe);
+  transition: background 0.2s ease;
+  border-radius: var(--radius-sm);
+}
+.price-row__button:hover {
+  background: var(--sakura-pale);
+}
+
+.price-row__icon {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--sakura-pale);
+  color: var(--cherry);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.price-row__button:hover .price-row__icon {
+  background: var(--sakura);
+  transform: scale(1.06);
+}
+
+.price-row__name {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  flex-shrink: 0;
+}
+
+.price-row__desc {
+  font-family: var(--font-body);
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+}
+
+.price-row__leader {
+  flex: 1;
+  min-width: 1.5rem;
+  height: 1px;
+  background: var(--gold-light);
+  margin: 0 0.25rem;
+}
+
+.price-row__bloom {
+  flex-shrink: 0;
+  display: flex;
+  margin-right: 0.5rem;
+  opacity: 0;
+  transform: scale(0.4) rotate(-40deg);
+  transition: opacity 0.28s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.price-row__button:hover .price-row__bloom,
+.price-row__button:focus-visible .price-row__bloom {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .price-row__bloom {
+    transition: opacity 0.2s ease;
+    transform: none;
+  }
+  .price-row__button:hover .price-row__bloom,
+  .price-row__button:focus-visible .price-row__bloom {
+    transform: none;
+  }
+}
+
+.price-row__duration {
+  flex-shrink: 0;
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+}
+
+.price-row__price {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  color: var(--cherry);
+  min-width: 3.5ch;
+  text-align: right;
+}
+
+/* On a touch screen the blossom is the row's only sign that it is a button,
+   and there is no hover to reveal it — so it is simply open. Without this the
+   price list reads as a printed menu on every phone that visits. */
+@media (hover: none) {
+  .price-row__bloom {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .price-row__button {
+    flex-wrap: wrap;
+    row-gap: 0.6rem;
+  }
+  /* The leader line goes, the blossom stays: the rule was decoration, the
+     blossom is the affordance. The name yields exactly the width the blossom
+     needs so it rides the end of the first line rather than wrapping alone. */
+  .price-row__leader {
+    display: none;
+  }
+  /* Open here too, and for the same reason as the hover:none rule above: the
+     leader line is gone at this width, so without the blossom the row has
+     nothing left that says it can be pressed. */
+  .price-row__bloom {
+    margin-right: 0;
+    opacity: 1;
+    transform: none;
+  }
+  .price-row__name {
+    width: calc(100% - 6rem);
+  }
+  .price-row__duration {
+    margin-left: 3.4rem;
+  }
+}
+
+/* The bough already owns the bottom-left corner, so the scatter is held off the
+   floor — two ornaments in the same corner at the same weight read as a smudge
+   rather than as two things. */
+.services-section__fallen {
+  inset: 0 0 18% 0;
+}
