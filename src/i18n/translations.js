@@ -40,7 +40,6 @@ export const translations = {
     booking: {
       title: "Reservá tu turno",
       subtitle: "Elegí profesional, servicio y horario, y confirmá el turno.",
-      note: "Demo: podés recorrer el flujo completo, pero no se registra ningún turno ni se envía nada.",
       stepOf: "Paso {n} de {total}",
       branch: {
         label: "Sede",
@@ -75,6 +74,8 @@ export const translations = {
         pastBadge: "Pasado",
         noSlots: "Sin turnos disponibles ese día para esta combinación. Probá otra fecha.",
         noSlotsToday: "Ya no quedan horarios para hoy. Probá con mañana.",
+        loadingSlots: "Buscando horarios disponibles…",
+        slotsError: "No pudimos cargar los horarios. Probá de nuevo en un momento.",
         morning: "Mañana",
         afternoon: "Tarde",
         evening: "Noche",
@@ -91,7 +92,7 @@ export const translations = {
         durationValue: "{n} min",
         price: "Precio",
         contactTitle: "Tus datos",
-        contactHint: "Los pedimos como los pediría el salón real. En esta demo no salen de tu navegador.",
+        contactHint: "Los pedimos para confirmarte el turno y avisarle al salón.",
         name: "Tu nombre",
         namePlaceholder: "Nombre y apellido",
         email: "Tu correo",
@@ -99,8 +100,11 @@ export const translations = {
         phone: "Tu teléfono",
         phonePlaceholder: "+54 11 5555 5555",
         confirm: "Confirmar turno",
+        confirming: "Confirmando…",
         back: "Volver",
         errorSummary: "Faltan datos para confirmar. Revisá lo marcado más abajo.",
+        slotTaken: "Justo se ocupó ese horario. Elegí otro más abajo.",
+        submitError: "No pudimos confirmar el turno. Probá de nuevo en un momento.",
         errors: {
           nameRequired: "Escribí tu nombre para saber a quién esperamos.",
           nameShort: "Necesitamos al menos dos letras.",
@@ -115,7 +119,7 @@ export const translations = {
         subtitle: "Guardá el número de reserva: es lo que te va a pedir el salón.",
         ticketNo: "Número de reserva",
         another: "Reservar otro turno",
-        demoNote: "Esto es una demostración: el turno no quedó registrado en ningún sistema y no vas a recibir correos ni mensajes.",
+        emailNote: "Te enviamos la confirmación por correo. El salón también fue notificado.",
       },
     },
     footer: {
@@ -180,7 +184,6 @@ export const translations = {
     booking: {
       title: "Book your appointment",
       subtitle: "Pick your professional, service and time, then confirm.",
-      note: "Demo: you can walk the whole flow, but no appointment is recorded and nothing is sent.",
       stepOf: "Step {n} of {total}",
       branch: {
         label: "Location",
@@ -215,6 +218,8 @@ export const translations = {
         pastBadge: "Past",
         noSlots: "No slots open that day for this pick. Try another date.",
         noSlotsToday: "No times left today. Try tomorrow.",
+        loadingSlots: "Looking up open times…",
+        slotsError: "We couldn't load the available times. Try again in a moment.",
         morning: "Morning",
         afternoon: "Afternoon",
         evening: "Evening",
@@ -231,7 +236,7 @@ export const translations = {
         durationValue: "{n} min",
         price: "Price",
         contactTitle: "Your details",
-        contactHint: "We ask for these the way the real salon would. In this demo they never leave your browser.",
+        contactHint: "We ask for these to confirm your appointment and notify the salon.",
         name: "Your name",
         namePlaceholder: "First and last name",
         email: "Your email",
@@ -239,8 +244,11 @@ export const translations = {
         phone: "Your phone",
         phonePlaceholder: "+54 11 5555 5555",
         confirm: "Confirm appointment",
+        confirming: "Confirming…",
         back: "Back",
         errorSummary: "Some details are missing. Check the fields marked below.",
+        slotTaken: "That time was just taken. Pick another one below.",
+        submitError: "We couldn't confirm the appointment. Try again in a moment.",
         errors: {
           nameRequired: "Add your name so we know who to expect.",
           nameShort: "We need at least two letters.",
@@ -255,7 +263,7 @@ export const translations = {
         subtitle: "Keep the booking number: it is what the salon will ask you for.",
         ticketNo: "Booking number",
         another: "Book another appointment",
-        demoNote: "This is a demo: the appointment was not recorded anywhere, and you will not receive emails or messages.",
+        emailNote: "We sent the confirmation to your email. The salon was notified too.",
       },
     },
     footer: {

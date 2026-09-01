@@ -57,9 +57,33 @@ export const services = [
   },
 ];
 
+// UUIDs of the matching resources on the live reservations backend
+// (see API.md). Seeded once via a one-off admin script — negocioId lives on
+// each location below, profesionalId on each professional, and servicioId
+// here since the same local service id maps to a different UUID per branch.
+const SERVICE_API_IDS = {
+  palermo: {
+    corte: "75ef7965-ddba-4352-83cf-21053dba62a4",
+    color: "fe63f958-65f4-41cd-a7b4-55c0d34dbebb",
+    maquillaje: "5d2122d9-b6e9-4d6a-aae1-9781d5a69942",
+  },
+  belgrano: {
+    manicura: "4fe06756-9fae-452f-9200-3f3b44b916a7",
+    pedicura: "d79b13de-6f99-46a7-a552-0f35e0a565e4",
+  },
+  recoleta: {
+    facial: "15ffda45-b706-4766-b552-b13f853f0b11",
+  },
+};
+
+export function serviceApiId(branchId, serviceId) {
+  return SERVICE_API_IDS[branchId]?.[serviceId] ?? null;
+}
+
 export const professionals = [
   {
     id: "camila",
+    profesionalId: "162f5b1d-3bc3-4233-be36-38f55a7f54fe",
     name: "Camila Reyes",
     es: { role: "Estilista senior", specialty: "Cortes y color", bio: "12 años dando forma a cabello de todo tipo, sin dos cortes iguales." },
     en: { role: "Senior stylist", specialty: "Cuts & color", bio: "12 years shaping every kind of hair — no two cuts alike." },
@@ -71,6 +95,7 @@ export const professionals = [
   },
   {
     id: "valentina",
+    profesionalId: "21d2ddf1-e10e-45e8-894a-386b2f13d645",
     name: "Valentina Ortiz",
     es: { role: "Técnica en uñas", specialty: "Manicura y pedicura", bio: "Precisión milimétrica y una vitrina de esmaltes que no para de crecer." },
     en: { role: "Nail technician", specialty: "Manicure & pedicure", bio: "Millimeter precision and a polish shelf that never stops growing." },
@@ -82,6 +107,7 @@ export const professionals = [
   },
   {
     id: "sofia",
+    profesionalId: "f6f164ce-f8ca-4136-86e4-cdf3a5c933fb",
     name: "Sofía Aguirre",
     es: { role: "Esteticista", specialty: "Faciales", bio: "Diagnostica tu piel antes de tocarla, y elige el tratamiento en consecuencia." },
     en: { role: "Esthetician", specialty: "Facials", bio: "Reads your skin before touching it, and picks the treatment to match." },
@@ -93,6 +119,7 @@ export const professionals = [
   },
   {
     id: "marcela",
+    profesionalId: "bf64c019-6800-45c5-be7e-fdf1911756ae",
     name: "Marcela Duarte",
     es: { role: "Maquilladora", specialty: "Maquillaje social y editorial", bio: "Del backstage de moda al salón: cada rostro, un plan distinto." },
     en: { role: "Makeup artist", specialty: "Event & editorial makeup", bio: "From fashion backstage to the salon floor: every face gets its own plan." },
@@ -196,6 +223,7 @@ export const portfolio = [
 export const locations = [
   {
     id: "palermo",
+    negocioId: "0384f0d1-3866-445f-bbcb-2c02768eb6d4",
     coords: [-34.5885, -58.4278],
     phone: "+54 11 4832 7710",
     // Tue-Sat: closed Sunday AND Monday, 9:00-19:00.
@@ -217,6 +245,7 @@ export const locations = [
   },
   {
     id: "belgrano",
+    negocioId: "78d17435-068b-4447-b496-f70f1c1ac406",
     coords: [-34.5622, -58.4562],
     phone: "+54 11 4783 2140",
     // Tue-Sat: closed Sunday AND Monday, 10:00-20:00.
@@ -238,6 +267,7 @@ export const locations = [
   },
   {
     id: "recoleta",
+    negocioId: "32a7b8a0-088f-4922-b3c6-6a006439eced",
     coords: [-34.5952, -58.3925],
     phone: "+54 11 4815 6690",
     // Mon-Sat: closed Sunday only, 9:00-18:00.

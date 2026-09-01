@@ -1,19 +1,3 @@
-// Deterministic pseudo-availability so the demo calendar feels alive without
-// a backend: the same professional + date + slot always resolves the same way.
-function hashString(str) {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-export const TIME_SLOTS = [
-  "09:00", "09:45", "10:30", "11:15", "12:00",
-  "13:30", "14:15", "15:00", "15:45", "16:30", "17:15", "18:00",
-];
-
 // Fallback for the moment before a branch is known. Every house is shut on
 // Sunday at minimum; Palermo and Belgrano also close Monday, which is why the
 // calendar and slot list below take the chosen branch's own closedWeekdays
@@ -73,30 +57,15 @@ export function isBookableDay(date, now = new Date(), closedWeekdays = CLOSED_WE
   return !isPastDay(date, now) && !isClosedDay(date, closedWeekdays);
 }
 
-// A branch's own opening hours narrow the fixed slot grid: Belgrano doesn't
-// open until 10:00, so its 09:00 slot never appears; Recoleta closes at
-// 18:00, so a slot starting there or later doesn't fit before close.
-export function isSlotWithinHours(slot, openHour, closeHour) {
-  const hour = Number(slot.split(":")[0]);
-  return hour >= openHour && hour < closeHour;
-}
-
 // A 09:00 slot is not bookable at 16:00 today. Only today needs the check:
-// past days are already refused above, future days are always ahead.
+// past days are already refused above, future days are always ahead. The
+// backend's disponibilidad endpoint returns every slot inside business
+// hours regardless of the current time, so this filter still has to run
+// client-side after fetching.
 export function isSlotInPast(date, slot, now = new Date()) {
   if (!isSameDay(date, now)) return false;
   const [hour, minute] = slot.split(":").map(Number);
   const slotTime = new Date(date);
   slotTime.setHours(hour, minute, 0, 0);
   return slotTime <= now;
-}
-
-export function isSlotAvailable(professionalId, dateISO, slot) {
-  const h = hashString(`${professionalId}|${dateISO}|${slot}`);
-  return h % 5 !== 0 && h % 7 !== 0;
-}
-
-export function ticketNumberFor(professionalId, dateISO, slot, serviceId) {
-  const h = hashString(`${professionalId}|${dateISO}|${slot}|${serviceId}|ticket`);
-  return String(1000 + (h % 8999));
 }

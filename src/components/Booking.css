@@ -609,6 +609,15 @@
 .booking-nav__confirm:hover {
   background: var(--cherry-ink);
 }
+.booking-nav__confirm:disabled {
+  background: var(--cream-line);
+  color: var(--taupe-soft);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.booking-nav__confirm:disabled:hover {
+  background: var(--cream-line);
+}
 
 /* --- Confirmation: the signature interaction --- */
 .confirmed-wrap {

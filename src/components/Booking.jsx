@@ -1,12 +1,9 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
-import { professionals, services, locations } from "../data";
+import { professionals, services, locations, serviceApiId } from "../data";
 import {
-  TIME_SLOTS,
   slotPeriod,
-  isSlotAvailable,
   isSlotInPast,
-  isSlotWithinHours,
   isBookableDay,
   isClosedDay,
   isPastDay,
@@ -14,8 +11,8 @@ import {
   dateToISO,
   addDays,
   startOfDay,
-  ticketNumberFor,
 } from "../lib/availability";
+import { fetchDisponibilidad, crearReservaServicio, ReservaError } from "../lib/reservasApi";
 import Icon from "./Icon";
 import Reveal from "./Reveal";
 import Blossom, { BranchWatermark, FallingPetals, PetalScatter, SakuraDivider } from "./Sakura";
@@ -85,6 +82,13 @@ export default function Booking({ preset }) {
   const [errors, setErrors] = useState({});
   const [attempted, setAttempted] = useState(false);
   const [confirmed, setConfirmed] = useState(null);
+  const [slots, setSlots] = useState([]);
+  const [slotsRaw, setSlotsRaw] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState(false);
+  const [slotsRefreshKey, setSlotsRefreshKey] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const nameRef = useRef(null);
   const emailRef = useRef(null);
@@ -153,27 +157,66 @@ export default function Booking({ preset }) {
     return startOfDay(weekStart) <= today;
   }, [weekStart]);
 
+  // The backend hands back exact bookable start times for this professional +
+  // service + day (it already excludes anything already reserved), so there
+  // is nothing left to compute here beyond turning each ISO timestamp into
+  // the "HH:mm" label the rest of the wizard works with, and dropping
+  // today's slots that have already elapsed — the endpoint returns those too.
+  useEffect(() => {
+    const negocioId = branch?.negocioId;
+    const profApiId = professional?.profesionalId;
+    const svcApiId = serviceId ? serviceApiId(branchId, serviceId) : null;
+    if (!selectedDate || !negocioId || !profApiId || !svcApiId) {
+      setSlots([]);
+      setSlotsRaw([]);
+      setSlotsError(false);
+      return;
+    }
+    let cancelled = false;
+    setSlotsLoading(true);
+    setSlotsError(false);
+    fetchDisponibilidad(negocioId, profApiId, dateToISO(selectedDate), svcApiId)
+      .then((iso) => {
+        if (cancelled) return;
+        const labels = iso.map(
+          (s) => `${String(new Date(s).getUTCHours()).padStart(2, "0")}:${String(new Date(s).getUTCMinutes()).padStart(2, "0")}`
+        );
+        setSlotsRaw(labels);
+        setSlots(labels.filter((slot) => !isSlotInPast(selectedDate, slot)));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSlotsRaw([]);
+        setSlots([]);
+        setSlotsError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setSlotsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDate, branchId, branch, professional, serviceId, slotsRefreshKey]);
+
+  // A slot picked for a professional/service/date that has since changed (or
+  // was just booked out from under the visitor) should not silently survive
+  // into the review step as an invisible, unconfirmable choice.
+  useEffect(() => {
+    if (selectedSlot && !slots.includes(selectedSlot)) setSelectedSlot(null);
+  }, [slots, selectedSlot]);
+
   const slotsByPeriod = useMemo(() => {
     const grouped = { morning: [], afternoon: [], evening: [] };
-    if (!selectedDate || !professionalId) return grouped;
-    const dateISO = dateToISO(selectedDate);
-    const now = new Date();
-    TIME_SLOTS.forEach((slot) => {
-      if (!isSlotWithinHours(slot, branch.openHour, branch.closeHour)) return;
-      if (isSlotInPast(selectedDate, slot, now)) return;
-      grouped[slotPeriod(slot)].push({
-        slot,
-        available: isSlotAvailable(professionalId, dateISO, slot),
-      });
-    });
+    slots.forEach((slot) => grouped[slotPeriod(slot)].push(slot));
     return grouped;
-  }, [selectedDate, professionalId, branch]);
+  }, [slots]);
 
-  const anySlotAvailable = Object.values(slotsByPeriod).some((arr) => arr.some((s) => s.available));
+  const anySlotAvailable = slots.length > 0;
   const allSlotsElapsed =
     Boolean(selectedDate) &&
     isSameDay(selectedDate, new Date()) &&
-    Object.values(slotsByPeriod).every((arr) => arr.length === 0);
+    slotsRaw.length > 0 &&
+    slots.length === 0;
 
   // Step 2 only lists what this professional actually does. The old filter
   // ended in "|| true", which offered every service and let a visitor book a
@@ -221,8 +264,8 @@ export default function Booking({ preset }) {
     if (attempted) setErrors(validateContact(next, errorText));
   }
 
-  function handleConfirm() {
-    if (confirmed) return;
+  async function handleConfirm() {
+    if (confirmed || submitting) return;
     const found = validateContact(contact, errorText);
     setAttempted(true);
     setErrors(found);
@@ -231,22 +274,46 @@ export default function Booking({ preset }) {
       fieldRefs[firstInvalid]?.current?.focus();
       return;
     }
+    setSubmitError(null);
+    setSubmitting(true);
     const dateISO = dateToISO(selectedDate);
-    setConfirmed({
-      branch,
-      professional,
-      service,
-      // The Date itself travels to the confirmation. Re-parsing the ISO
-      // string there is what made the review and the receipt disagree by a
-      // day for anyone west of UTC.
-      date: selectedDate,
-      dateISO,
-      slot: selectedSlot,
-      name: contact.name.trim(),
-      email: contact.email.trim(),
-      phone: contact.phone.trim(),
-      ticketNo: ticketNumberFor(professionalId, dateISO, selectedSlot, serviceId),
-    });
+    try {
+      const reserva = await crearReservaServicio({
+        negocioId: branch.negocioId,
+        profesionalId: professional.profesionalId,
+        servicioId: serviceApiId(branchId, serviceId),
+        inicio: `${dateISO}T${selectedSlot}:00.000Z`,
+        clienteNombre: contact.name.trim(),
+        clienteEmail: contact.email.trim(),
+        clienteTelefono: contact.phone.trim(),
+      });
+      setConfirmed({
+        branch,
+        professional,
+        service,
+        // The Date itself travels to the confirmation. Re-parsing the ISO
+        // string there is what made the review and the receipt disagree by a
+        // day for anyone west of UTC.
+        date: selectedDate,
+        dateISO,
+        slot: selectedSlot,
+        name: contact.name.trim(),
+        email: contact.email.trim(),
+        phone: contact.phone.trim(),
+        ticketNo: reserva.id.slice(0, 8).toUpperCase(),
+      });
+    } catch (err) {
+      if (err instanceof ReservaError && err.status === 409) {
+        setSubmitError(t.booking.review.slotTaken);
+        setSelectedSlot(null);
+        setSlotsRefreshKey((k) => k + 1);
+        goTo(2);
+      } else {
+        setSubmitError(t.booking.review.submitError);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function resetBooking() {
@@ -259,6 +326,7 @@ export default function Booking({ preset }) {
     setContact({ name: "", email: "", phone: "" });
     setErrors({});
     setAttempted(false);
+    setSubmitError(null);
     setStepIndex(0);
   }
 
@@ -475,35 +543,40 @@ export default function Booking({ preset }) {
 
                   {selectedDate && (
                     <div className="slot-groups">
-                      {allSlotsElapsed ? (
+                      {slotsLoading ? (
+                        <p className="slot-empty">{t.booking.calendar.loadingSlots}</p>
+                      ) : slotsError ? (
+                        <p className="review-error-summary" role="alert">
+                          <Icon name="alert" size={15} />
+                          {t.booking.calendar.slotsError}
+                        </p>
+                      ) : allSlotsElapsed ? (
                         <p className="slot-empty">{t.booking.calendar.noSlotsToday}</p>
                       ) : (
                         !anySlotAvailable && <p className="slot-empty">{t.booking.calendar.noSlots}</p>
                       )}
-                      {["morning", "afternoon", "evening"].map(
-                        (period) =>
-                          slotsByPeriod[period].some((s) => s.available) && (
-                            <div className="slot-group" key={period}>
-                              <span className="slot-group__label">{t.booking.calendar[period]}</span>
-                              <div className="slot-group__row">
-                                {slotsByPeriod[period].map(({ slot, available }) => (
-                                  <button
-                                    key={slot}
-                                    type="button"
-                                    disabled={!available}
-                                    className={`slot-btn numerals ${selectedSlot === slot ? "is-selected" : ""}`}
-                                    onClick={() => setSelectedSlot(slot)}
-                                  >
-                                    {slot}
-                                    {!available && (
-                                      <span className="sr-only"> ({t.booking.calendar.booked})</span>
-                                    )}
-                                  </button>
-                                ))}
+                      {!slotsLoading &&
+                        !slotsError &&
+                        ["morning", "afternoon", "evening"].map(
+                          (period) =>
+                            slotsByPeriod[period].length > 0 && (
+                              <div className="slot-group" key={period}>
+                                <span className="slot-group__label">{t.booking.calendar[period]}</span>
+                                <div className="slot-group__row">
+                                  {slotsByPeriod[period].map((slot) => (
+                                    <button
+                                      key={slot}
+                                      type="button"
+                                      className={`slot-btn numerals ${selectedSlot === slot ? "is-selected" : ""}`}
+                                      onClick={() => setSelectedSlot(slot)}
+                                    >
+                                      {slot}
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )
-                      )}
+                            )
+                        )}
                     </div>
                   )}
                 </div>
@@ -558,6 +631,13 @@ export default function Booking({ preset }) {
                     <p className="review-error-summary" role="alert">
                       <Icon name="alert" size={15} />
                       {t.booking.review.errorSummary}
+                    </p>
+                  )}
+
+                  {submitError && (
+                    <p className="review-error-summary" role="alert">
+                      <Icon name="alert" size={15} />
+                      {submitError}
                     </p>
                   )}
 
@@ -638,8 +718,13 @@ export default function Booking({ preset }) {
                   </button>
                 </span>
               ) : (
-                <button type="button" className="booking-nav__confirm" onClick={handleConfirm}>
-                  {t.booking.review.confirm}
+                <button
+                  type="button"
+                  className="booking-nav__confirm"
+                  disabled={submitting}
+                  onClick={handleConfirm}
+                >
+                  {submitting ? t.booking.review.confirming : t.booking.review.confirm}
                   <Icon name="check" size={17} />
                 </button>
               )}
@@ -735,7 +820,7 @@ function ConfirmedCard({ confirmed, t, lang, onReset }) {
           </dl>
         </div>
 
-        <p className="confirmed-card__footnote">{t.booking.confirmed.demoNote}</p>
+        <p className="confirmed-card__footnote">{t.booking.confirmed.emailNote}</p>
         <button type="button" className="confirmed-card__reset" onClick={onReset}>
           {t.booking.confirmed.another}
         </button>

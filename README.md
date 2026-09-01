@@ -32,4 +32,5 @@ npm run preview  # previsualizar el build
 
 Los precios, las biografías del equipo y la dirección son marcadores de posición
 hasta que haya contenido real. Las fotos son de Unsplash, verificadas. La reserva
-es una maqueta funcional sin backend: no envía ni guarda datos.
+está conectada a un backend real ([API.md](API.md)): la disponibilidad y la
+confirmación del turno son datos en vivo, no una maqueta.
