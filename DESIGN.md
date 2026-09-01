@@ -34,7 +34,7 @@ typography:
     fs-title-lg: "1.3rem"
   display:
     fontFamily: "Libre Caslon Display, Georgia, Times New Roman, serif"
-    fontSize: "clamp(2.7rem, 6vw, 4.3rem)"
+    fontSize: "clamp(2.85rem, 6.4vw, 5rem)"
     fontWeight: 400
     lineHeight: 1.1
     letterSpacing: "-0.01em"
@@ -113,11 +113,12 @@ Two craft-bar references were studied directly (DOM/CSS inspected live, neither 
 
 **Key Characteristics:**
 - Blush-cream ground carrying a sparse tiled fallen-petal texture on every full-width surface; a five-step rose ramp is the primary, sage is demoted to a quiet second voice, gold reserved for hairlines and stamens.
-- One blossom mark, drawn once (`PETAL_PATH` in `Sakura.jsx`) and reused at every size: the logo, the favicon, the dome apex, the section divider, the professional-card seal, and the confirmation.
+- One blossom mark, drawn once (`PETAL_PATH` in `Sakura.jsx`) and reused at every size: the logo, the favicon, the hero canopy, the dome apex, the section divider, the professional-card seal, and the confirmation.
 - Line-art boughs enter each section from a different corner — never the top-left, where every heading sits — so the motif recurs without repeating.
 - Editorial serif display type (Libre Caslon Display) paired with an italic serif for emphasis words, set against a light humanist sans body (Work Sans).
 - The Portfolio section rises over the Hero as a giant domed panel — a true circular arc overlaid on the hero, growing on scroll — lifted directly from venetianspa.ca's hero-to-section technique.
-- The branch divider marks every section seam; falling petals run dense in the hero (44) and thin in the booking section (14), so the page's first and last screens rhyme. Both are fully disabled under `prefers-reduced-motion`.
+- The branch divider marks every section seam; falling petals run dense in the hero (28) and thin in the booking section (14), so the page's first and last screens rhyme. Both are fully disabled under `prefers-reduced-motion`.
+- The hero's background is not a photograph: two mirrored line-art boughs (`HeroCanopy`) enter from the top corners and grow in on load, tapering toward the centered copy — the same stroke-plus-blossom vocabulary as the section watermarks, at the hero's own scale and as its one authored entrance moment.
 - Sections stagger their heading/subtitle/content in on independent scroll-reveals rather than fading in as one block.
 
 ## Colors
@@ -165,7 +166,7 @@ A blush-cream base carries the page and a five-step rose ramp runs the whole int
 Below Display and Headline, every role resolves to one step of a shared scale (`--fs-micro` 0.7rem, `--fs-label` 0.78rem, `--fs-small` 0.85rem, `--fs-body` 1rem, `--fs-body-lg` 1.05rem, `--fs-title` 1.2rem, `--fs-title-lg` 1.3rem, `tokens.css`) rather than scattered literal values — new component type should pick the nearest step instead of writing a fresh `rem` value.
 
 ### Hierarchy
-- **Display** (400, `clamp(2.7rem, 6vw, 4.3rem)`, 1.1 line-height): hero headline only, max-width 14ch. The `em` word inside it switches to italic Libre Caslon Text in sakura-deep.
+- **Display** (400, `clamp(2.85rem, 6.4vw, 5rem)`, 1.1 line-height): hero headline only, max-width 14ch, turned up from an earlier 4.3rem ceiling to spend the brand's one full-volume display moment closer to the type system's actual headroom. The `em` word inside it switches to italic Libre Caslon Text in sakura-deep.
 - **Headline** (400, `clamp(2rem, 4vw, 3rem)`, default): section headings (`.section-kicker-free-heading`), max-width 40ch. The Portfolio dome steps this up to `clamp(2.1rem, 5.2vw, 4rem)` — the section is the widest, tallest surface on the page, and the row-title-scale heading it inherited used to float in the pink field like a mislaid label.
 - **Title** (400, `--fs-title`/`--fs-title-lg`, 1.2-1.3rem): card and row titles (price-row name, booking panel h3s) — always in the display face even at small size. The professional gallery's name is its own fluid step, `clamp(1.35rem, 1.9vw, 1.7rem)`, scaled against the wide arched portrait it captions rather than pinned to the row-title size.
 - **Body** (400, 17px base / `--fs-body`-`--fs-body-lg`, 1.65-1.7 line-height): paragraph copy, 46-52ch max width for readability.
@@ -182,7 +183,7 @@ A single centered container (`max-width: 1200px`) holds every section; fluid cla
 
 The hero is `position: sticky` on desktop (≥901px) and pins under the nav while the Portfolio section's domed top edge rises over it on scroll — the signature hero-to-section overlap. Two rules make that work and must move together:
 
-- `.hero-pin` is taller than `.hero` by `--hero-pin-travel` (70svh). A sticky element only travels by the slack between it and its containing block, so at equal heights it has none and simply scrolls away — the pin is silently inert. The extra wrapper height is what buys the photo somewhere to hold still.
+- `.hero-pin` is taller than `.hero` by `--hero-pin-travel` (70svh). A sticky element only travels by the slack between it and its containing block, so at equal heights it has none and simply scrolls away — the pin is silently inert. The extra wrapper height is what buys the hero somewhere to hold still.
 - `.portfolio-section` reclaims that same travel in its negative `margin-top`, alongside its own `--dome-peek`. Without it the travel would become blank page below the hero.
 
 `--hero-pin-travel` is `0px` wherever the hero doesn't pin (below 901px, and under `prefers-reduced-motion`), which zeroes both rules at once. The hero photo stays a full `100svh` at every scroll position: the dome is drawn *over* it, never beside it, so the arc peeking at rest costs the image no height. Below 900px this collapses to normal document flow (`position: relative`), and it degrades to fully static under `prefers-reduced-motion`. Sections alternate between `--cream` and `--cream-deep` backgrounds to mark transitions without hard borders (Portfolio uses `--cream-line` for the domed panel, since cream-deep sits too close to cream to read as its own shape there).
@@ -239,6 +240,15 @@ The Portfolio section additionally carries the rising dome silhouette — a one-
 ### The Blossom Mark (`Blossom`, `PETAL_PATH`)
 The whole identity resolves to one path. A cherry petal is broad, rounded at the shoulder, and notched at the tip — that cleft is what separates sakura from plum or peach. Two measurements make it work: the petal is ~70 degrees wide against 72 degrees of spacing, so adjacent petals nearly touch but leave a hairline gap (wider and the five fuse into a decagon blob), and the notch is a shallow 2.5-unit dimple, not a cleft (deeper puts ten sharp points on the silhouette and the mark reads as a gear at 16px). The stamens are eight gold dots on a tight ring, not drawn filaments — filaments alias into a spider at 30px and vanish at 16px. Petals are composited with group `opacity`, never `fill-opacity`, or the five overlaps compound into dark wedges and the flower reads as a pinwheel.
 
+### Hero Canopy (`HeroCanopy`)
+The hero has no photograph. Its whole background is two mirrored instances of this component — a stroke bough plus nine blossoms and four buds, the same vocabulary as `BranchWatermark`, at a scale that owns the viewport instead of sitting in a section corner. One enters top-left, one `flip`s in from top-right, both denser near their entering corner and tapering to nothing as they reach toward the centered copy, so the text always sits on clear cream rather than crossed branches. Opacity (0.62 desktop, 0.5 and a smaller `clamp` under 760px) keeps the canopy a presence behind the copy rather than a second subject competing with it — the mid step in the range between `BranchWatermark`'s 0.4 ambient-watermark ceiling and full strength, because here the branch carries the whole first viewport rather than one section's corner.
+
+The canopy grows in rather than simply appearing, the same technique the old hero seal proved: each stem/branch path draws itself (`stroke-dashoffset` normalized to `pathLength="1"`, so the draw-on timing survives anyone editing the curve later), buds catch up to their nearest point on the stem, then the blossoms open on top — stem at 0ms, the two sub-branches at 380/620ms, buds and blossoms staggered by index from ~420ms through ~1.4s. The right instance carries a 150ms overall offset (`--canopy-delay`) so the two sides read as one structure growing unevenly, not a mirrored effect calling attention to its own symmetry. The nav-style mark above the headline (`.hero__mark-row`) echoes the gesture as a quick 420ms flourish of its own, so the whole entrance reads as one motif blooming at two scales rather than one slow effect and one static holdover. Every piece settles into exactly its resting value (rotate/scale/opacity), so an interrupted or skipped animation still lands correctly, and all of it drops straight to that resting state under `prefers-reduced-motion`, with no draw or bloom at all.
+
+Every animated piece — the canopy's strokes/buds/blossoms and the mark-row blossom — is gated on a `revealed` flag, not on mount: Hero renders behind index.html's own preload curtain, so an animation that starts as soon as its element exists would run its whole course while still covered and finish before the curtain ever lifts. Each keyframe sits `animation-play-state: paused` from the stylesheet, which — combined with the `both` fill mode — holds every element at its frame-0 state (undrawn stem, closed bud, unbloomed flower) for as long as the page is behind the curtain. `HeroCanopy` takes `revealed` as its own prop rather than reading `.hero`'s class directly, so it stays a self-contained component; Hero flips its `revealed` state once `window.SakuraPreloader.lifted` resolves (the same signal `lib/preloader.js` uses to release Lenis), and every delay in the sequence counts from that moment, not from React mount.
+
+The hero background carries a soft radial blush-into-cream wash (`radial-gradient(62% 55% at 50% 40%, var(--blush) ...)`) behind the canopy and the page's own petal texture — the same soft-bloom-behind-the-lockup treatment index.html's own preload curtain already uses, so the curtain lifts onto a hero that continues its exact visual language rather than switching to an unrelated scene.
+
 ### Logo (`Logo`)
 Built out of the page's own typography, not imported over it: "Sakura" in Libre Caslon Display, "Bloom" in Libre Caslon Text italic in cherry. **Inline** (mark + two-line type) for the nav, where the mark rests at -8 degrees and rights itself on hover. **Stacked** (mark over a 0.14em-tracked uppercase wordmark, italic tail hung between two gold hairlines) for the footer. Below 760px the nav drops the italic tail — the mark already says it. The favicon is the same mark at 0.86 scale on cream.
 
@@ -250,7 +260,7 @@ A tiled fallen-petal texture under every full-width surface: six petals per 320p
 
 ### Sakura Divider & Falling Petals
 - **Sakura Divider:** a gold line-art branch with three blossoms at descending scales, centered as a pure visual boundary between sections — never bound to a heading or carrying text.
-- **Falling Petals:** petals (`border-radius: 100% 0 100% 0`) on a linear infinite fall with randomized position, delay, duration, size, drift, spin, and peak opacity. 44 in the hero, 14 at 0.8 scale in the booking section, so the first and last screens rhyme. Fall distance is the `--fall-span` token (default `115vh`) because percentage translations resolve against the petal's own 10px box, not its container. Fully disabled under `prefers-reduced-motion: reduce`.
+- **Falling Petals:** petals (`border-radius: 100% 0 100% 0`) on a linear infinite fall with randomized position, delay, duration, size, drift, spin, and peak opacity. 28 in the hero, 14 at 0.8 scale in the booking section, so the first and last screens rhyme — and with the hero's own branches now visible overhead, the fall reads as literally dropping from them rather than from an implied off-screen source. Fall distance is the `--fall-span` token (default `115vh`) because percentage translations resolve against the petal's own 10px box, not its container. Fully disabled under `prefers-reduced-motion: reduce`.
 
 ## Do's and Don'ts
 

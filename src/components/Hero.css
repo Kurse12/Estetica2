@@ -1,7 +1,8 @@
 .hero {
   position: relative;
   z-index: 1;
-  background: var(--cream);
+  background: radial-gradient(62% 55% at 50% 40%, var(--blush) 0%, rgba(252, 241, 242, 0.5) 48%, rgba(252, 241, 242, 0) 78%),
+    var(--cream);
   background-image: var(--petal-texture);
   padding: clamp(1.25rem, 5vw, 3.5rem);
   overflow: hidden;
@@ -30,7 +31,7 @@
   .hero-pin {
     /* A sticky element only travels by the slack between it and its containing
        block; at equal heights it has none and just scrolls away like static
-       content. The wrapper is deliberately taller than the hero so the photo
+       content. The wrapper is deliberately taller than the hero so the canopy
        genuinely holds still, full-bleed, while the dome rises over it. */
     height: calc(100svh + var(--hero-pin-travel));
   }
@@ -58,49 +59,6 @@
   }
 }
 
-.hero__bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.hero__bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 50% 50%;
-}
-
-.hero__scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    100deg,
-    var(--cream) 0%,
-    rgba(253, 248, 246, 0.94) 26%,
-    rgba(253, 248, 246, 0.68) 44%,
-    rgba(253, 248, 246, 0.22) 62%,
-    rgba(253, 248, 246, 0.04) 76%,
-    transparent 88%
-  );
-}
-
-@media (max-width: 900px) {
-  .hero__scrim {
-    /* Text runs nearly the full mobile viewport height, so instead of a
-       gradient window (which let busy branch detail show through right
-       behind the copy) lay one even veil over the whole photo and only
-       let it thin out at the very bottom, as a peek before the dome. */
-    background: linear-gradient(
-      180deg,
-      rgba(253, 248, 246, 0.93) 0%,
-      rgba(253, 248, 246, 0.9) 75%,
-      rgba(253, 248, 246, 0.62) 90%,
-      rgba(253, 248, 246, 0.4) 100%
-    );
-  }
-}
-
 .hero__inner {
   position: relative;
   z-index: 2;
@@ -125,19 +83,56 @@
   display: flex;
   flex-direction: column;
   gap: 1.35rem;
-  align-items: flex-start;
-  max-width: 34rem;
+  align-items: center;
+  text-align: center;
+  max-width: 38rem;
+  margin: 0 auto;
+}
+
+.hero__mark-row {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.hero__mark-row .blossom {
+  /* The nav mark's own resting tilt — a picked blossom, not a stamped icon.
+     Paused at frame 0 (held there by the `both` fill mode) until .hero picks
+     up is-revealed — Hero mounts behind index.html's preload curtain, so
+     playing on mount would finish the whole entrance before anyone could
+     see it. */
+  animation: hero-mark-bloom 420ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+  animation-play-state: paused;
+}
+
+.hero.is-revealed .hero__mark-row .blossom {
+  animation-play-state: running;
+}
+
+@keyframes hero-mark-bloom {
+  from {
+    opacity: 0;
+    transform: rotate(-30deg) scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+
+.hero__mark-line {
+  width: 40px;
+  height: 1px;
+  background: var(--gold-light);
 }
 
 .hero__title {
-  font-size: clamp(2.7rem, 6vw, 4.3rem);
+  /* Turned up from the site's old 4.3rem ceiling: the hero is the one display
+     moment the brand gets to make at full volume, and 4.3rem was leaving
+     headroom on the table well inside the 6rem floor-check limit. */
+  font-size: clamp(2.85rem, 6.4vw, 5rem);
   line-height: 1.1;
   max-width: 14ch;
-  /* The scrim thins by design toward the photo's right edge, and a dark
-     branch or leaf can still sit under a glyph there — a soft cream halo
-     around each letter holds the headline's contrast wherever the photo
-     underneath goes dark, without touching the scrim's own gradient. */
-  text-shadow: 0 1px 3px rgba(253, 248, 246, 0.9), 0 2px 18px rgba(253, 248, 246, 0.75);
 }
 
 .hero__title em {
@@ -149,12 +144,8 @@
 .hero__body {
   font-size: 1.1rem;
   line-height: 1.5;
-  color: var(--taupe);
+  color: var(--taupe-soft);
   max-width: 40ch;
-  /* Same guarantee as the headline, tuned down for a smaller weight of
-     text: normal text needs the stricter 4.5:1, so the halo can't be this
-     thin and still hold up over a dark patch of the photo. */
-  text-shadow: 0 1px 2px rgba(253, 248, 246, 0.95), 0 1px 14px rgba(253, 248, 246, 0.85);
 }
 
 .hero__cta {
@@ -176,22 +167,19 @@
   transform: translateY(-2px);
 }
 
-
-/* The landed petals are penned into the bottom-left, which is the one part of
-   the hero that is empty by design: the scrim is fully opaque there, the copy
-   stops above it, and the photo's own blossoms are all on the other side. Left
-   over the whole section they would scatter across the sakura branch and read
-   as dirt on the lens. */
+/* The landed petals gather along the whole bottom edge rather than one
+   pocket — the copy above is centered now, so both corners are equally
+   empty, where the canopies above have already thinned to nothing. */
 .hero__fallen {
-  inset: auto auto 7% 1.5%;
-  width: min(38%, 460px);
-  height: 26%;
+  inset: auto 2% 5% 2%;
+  width: auto;
+  height: 24%;
 }
 
 @media (max-width: 900px) {
-  /* The mobile copy runs nearly the full height and the veil covers the whole
-     photo, so there is no left margin to gather in — the drift becomes a band
-     along the bottom edge instead, just above where the dome peeks in. */
+  /* The mobile copy runs nearly the full height, so the drift becomes a
+     thin band right along the bottom edge, just above where the dome
+     peeks in. */
   .hero__fallen {
     inset: auto 0 4% 0;
     width: auto;

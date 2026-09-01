@@ -103,6 +103,116 @@
 }
 
 /* ---------------------------------------------------------------------------
+   Hero canopy
+   --------------------------------------------------------------------------- */
+.hero-canopy {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  z-index: 0;
+  width: clamp(300px, 42vw, 620px);
+  opacity: 0.62;
+}
+
+.hero-canopy--flip {
+  right: 0;
+  left: auto;
+  transform: scaleX(-1);
+}
+
+.hero-canopy:not(.hero-canopy--flip) {
+  left: 0;
+}
+
+.hero-canopy svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Paused at frame 0 (held there by the `both` fill mode) until the parent
+   page marks this instance revealed — a hero mounted behind a preload
+   curtain would otherwise finish this whole entrance while still covered.
+   See Hero.jsx's own note on the same pattern. */
+.hero-canopy__stroke {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hero-canopy-draw 850ms cubic-bezier(0.16, 1, 0.3, 1) var(--canopy-delay, 0ms) both;
+  animation-play-state: paused;
+}
+
+.hero-canopy__bud {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: hero-canopy-pop 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-play-state: paused;
+}
+
+.hero-canopy__blossom {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: hero-canopy-bloom 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-play-state: paused;
+}
+
+.hero-canopy.is-revealed .hero-canopy__stroke,
+.hero-canopy.is-revealed .hero-canopy__bud,
+.hero-canopy.is-revealed .hero-canopy__blossom {
+  animation-play-state: running;
+}
+
+@keyframes hero-canopy-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hero-canopy-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hero-canopy-bloom {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-16deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-canopy__stroke,
+  .hero-canopy__bud,
+  .hero-canopy__blossom {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero-canopy__stroke {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero-canopy {
+    width: clamp(190px, 56vw, 300px);
+    opacity: 0.5;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Section divider
    --------------------------------------------------------------------------- */
 .sakura-divider {

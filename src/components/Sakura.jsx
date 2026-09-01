@@ -138,6 +138,102 @@ export function BranchWatermark({ className = "", flip = false, tone = "var(--br
   );
 }
 
+// ---------------------------------------------------------------------------
+// Hero canopy
+//
+// The hero's whole background: two of these, mirrored, standing in for the
+// photograph. Same stroke-bough-plus-blossom vocabulary as BranchWatermark,
+// but this instance grows in — the stem draws itself, buds catch up, then the
+// blossoms open — because here the branch is the hero's one authored entrance
+// moment, not a static corner watermark. Gated on its own `revealed` prop
+// rather than reading `.hero` directly, so the component doesn't need to know
+// what page it's mounted in.
+// ---------------------------------------------------------------------------
+const CANOPY_BUDS = [
+  { x: 95, y: 20, r: 3.4 },
+  { x: 150, y: 165, r: 3 },
+  { x: 215, y: 170, r: 2.6 },
+  { x: 265, y: 210, r: 2.4 },
+];
+
+const CANOPY_BLOSSOMS = [
+  { x: 30, y: 10, s: 0.85, r: -18 },
+  { x: 75, y: 55, s: 1.05, r: 14 },
+  { x: 130, y: 95, s: 0.7, r: -25 },
+  { x: 165, y: 130, s: 0.9, r: 30 },
+  { x: 190, y: 118, s: 0.6, r: -10 },
+  { x: 235, y: 122, s: 0.75, r: 20 },
+  { x: 195, y: 205, s: 0.95, r: -14 },
+  { x: 250, y: 250, s: 0.65, r: 22 },
+  { x: 285, y: 292, s: 0.55, r: -30 },
+];
+
+// A stem plus two offshoots, all normalized to pathLength="1" so the draw-on
+// timing is a plain 0 -> 1 regardless of anyone editing the curves later.
+// Bud/blossom delays are hand-tuned against these three draw windows rather
+// than derived, the same way BRANCH_BLOSSOMS's positions are hand-placed
+// against BranchWatermark's stroke.
+const CANOPY_STEM = "M6 -10C60 34 40 96 108 140C168 178 150 246 224 288C280 318 270 380 340 412";
+const CANOPY_BRANCH_A = "M108 140C150 118 206 108 258 128";
+const CANOPY_BRANCH_B = "M224 288C260 300 300 296 336 274";
+
+export function HeroCanopy({ flip = false, revealed = false, delayMs = 0, className = "" }) {
+  const delay = `${delayMs}ms`;
+  return (
+    <div
+      className={`hero-canopy ${flip ? "hero-canopy--flip" : ""} ${revealed ? "is-revealed" : ""} ${className}`}
+      style={{ "--canopy-delay": delay }}
+      aria-hidden="true"
+    >
+      <svg viewBox="0 0 460 520" fill="none" preserveAspectRatio="xMinYMin meet">
+        <g stroke="var(--branch)" strokeLinecap="round" fill="none">
+          <path className="hero-canopy__stroke" d={CANOPY_STEM} strokeWidth="2.2" pathLength="1" />
+          <path
+            className="hero-canopy__stroke"
+            d={CANOPY_BRANCH_A}
+            strokeWidth="1.6"
+            pathLength="1"
+            style={{ animationDelay: "calc(var(--canopy-delay) + 380ms)" }}
+          />
+          <path
+            className="hero-canopy__stroke"
+            d={CANOPY_BRANCH_B}
+            strokeWidth="1.5"
+            pathLength="1"
+            style={{ animationDelay: "calc(var(--canopy-delay) + 620ms)" }}
+          />
+        </g>
+        {CANOPY_BUDS.map((b, i) => (
+          <circle
+            key={`${b.x}-${b.y}`}
+            className="hero-canopy__bud"
+            cx={b.x}
+            cy={b.y}
+            r={b.r}
+            fill="var(--sakura-mid)"
+            style={{ animationDelay: `calc(var(--canopy-delay) + ${420 + i * 110}ms)` }}
+          />
+        ))}
+        {CANOPY_BLOSSOMS.map((b, i) => (
+          <g key={`${b.x}-${b.y}`} transform={`translate(${b.x - 20} ${b.y - 20}) rotate(${b.r} 20 20) scale(${b.s})`}>
+            <g
+              className="hero-canopy__blossom"
+              style={{ animationDelay: `calc(var(--canopy-delay) + ${520 + i * 90}ms)` }}
+            >
+              <g fill="var(--sakura-mid)">
+                {PETAL_ANGLES.map((angle) => (
+                  <path key={angle} d={PETAL_PATH} transform={`rotate(${angle} 20 20)`} />
+                ))}
+              </g>
+              <circle cx="20" cy="20" r="2.2" fill="var(--gold)" />
+            </g>
+          </g>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 // Pure ornament, no text label: a branch flourish used as a section boundary,
 // never bound to or standing in for a heading.
 export function SakuraDivider({ className = "" }) {

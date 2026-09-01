@@ -23,9 +23,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital@1&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
     <title>Sakura Bloom — Salón de Belleza</title>
 
-    <!-- Open Graph / Twitter preview. og:image reuses the hero photograph
-         (see Hero.jsx) cropped to the 1200x630 og:image convention, so a
-         shared link previews the same photo visitors see first on the site. -->
+    <!-- Open Graph / Twitter preview. The in-page hero no longer renders this
+         photo (see Hero.jsx — it's an illustrated branch canopy now), but a
+         link preview still wants a real photograph rather than the line-art
+         mark, so this stays a standalone asset, cropped to the 1200x630
+         og:image convention. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Sakura Bloom" />
     <meta property="og:url" content="https://sakurabloomestetica.vercel.app/" />
@@ -39,18 +41,6 @@
     <meta name="twitter:title" content="Sakura Bloom — Salón de Belleza" />
     <meta name="twitter:description" content="Sakura Bloom — salón de belleza. Trabajos, servicios, profesionales y reserva de turnos online." />
     <meta name="twitter:image" content="https://images.unsplash.com/photo-1761864534000-337153e88c92?w=1200&h=630&q=80&fm=jpg&fit=crop&auto=format" />
-
-    <!-- The hero photograph is the whole first viewport and the page's LCP, so
-         the browser is told about it here rather than discovering it three
-         seconds later, when the app bundle finally runs. The preloader below
-         reads this tag back to know what it is waiting for, so the URL lives in
-         one place in this document. It is mirrored in src/components/Hero.jsx,
-         which is what actually renders the photo; keep the two in step. -->
-    <link
-      rel="preload"
-      as="image"
-      href="https://images.unsplash.com/photo-1761864534000-337153e88c92?w=2400&q=80&fm=jpg&fit=crop&auto=format"
-    />
 
     <!-- ===================================================================
          Preloader
@@ -309,7 +299,7 @@
       THESIS: Elegant Spa Classic, and the cherry blossom is now the salon itself — the brand is Sakura Bloom, so the motif stops being an ornament laid over the category standard and becomes the thing the category standard is executed in: one notched-petal mark that is the logo, the favicon, the section seal and the confirmation, a rose ramp promoted from accent to primary, and fallen petals as the ground every surface is printed on.
       OWN-WORLD: Blush-cream ground carrying a tiled fallen-petal texture, a five-step rose ramp (petal pale to --cherry, the AA-contrast ink/CTA weight) as the primary with sage kept as the quiet second voice, warm taupe ink, gold stamens and hairlines, --branch bark for the line-art boughs that enter each section from an opposite corner. Libre Caslon Display/Text (italic) for headings, Work Sans for body and UI. Arched image frames, oversized display type with italic emphasis words, a line-art blossom-and-branch divider between sections, a dense bounded falling-petals layer in the hero. The Portfolio section rises over the hero as a giant domed panel (large top border-radius + negative margin-top overlap, a single blossom mark at its peak), lifted directly from venetianspa.ca's own hero-to-section technique. Nav goes from transparent-over-hero to a solid frosted bar on scroll; each section's heading/subtitle/content stagger in on their own scroll-reveal rather than fading in as one block. Craft bar named by the user: goldustspa.com (soft italic display, rounded organic photo shapes) and venetianspa.ca (bold tracked headlines, arched photo frames and hero-overlap dome, ornamental flourish motifs, transparent-to-solid sticky nav, staggered per-block scroll reveals) — both studied directly with a live browser, DOM/CSS inspected, neither copied verbatim.
       STORY: The visitor reads the salon as calm, light-filled, and trustworthy — sees real work, clear pricing, real professionals — then books in a soft, guided step-by-step flow that ends in a gentle confirmation.
-      FIRST VIEWPORT: A split hero — the blossom mark, an oversized serif headline ("Florecé en tu mejor versión") with the italic emphasis in cherry, and the CTA on cream at left; a full-bleed cherry-blossom photograph behind, with petals drifting down over the whole viewport.
+      FIRST VIEWPORT: A centered hero on a soft cream/blush ground — the blossom mark, an oversized serif headline ("Florecé en tu mejor versión") with the italic emphasis in cherry, body copy and the CTA, all centered; two mirrored line-art sakura boughs grow in from the top corners as the entrance moment, tapering toward the centered copy, with petals drifting down over the whole viewport.
       FORM: Elegant Spa Classic — the standing exit (category canon) — raised with a user-directed sakura motif after two named craft-bar references. Craft bar: goldustspa.com, venetianspa.ca.
       FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
     -->

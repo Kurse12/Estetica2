@@ -1,16 +1,9 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { onSmoothScroll } from "../lib/smoothScroll";
 import Icon from "./Icon";
-import Blossom, { FallingPetals, PetalScatter } from "./Sakura";
+import Blossom, { FallingPetals, HeroCanopy, PetalScatter } from "./Sakura";
 import "./Hero.css";
-
-// Cherry blossoms against blue sky — Weliton Soranzo, Unsplash (free license).
-// Mirrored by the <link rel="preload"> in index.html, which starts this
-// download on the first frame instead of on mount, and is what the curtain
-// there waits for. Change one, change the other.
-const HERO_PHOTO =
-  "https://images.unsplash.com/photo-1761864534000-337153e88c92?w=2400&q=80&fm=jpg&fit=crop&auto=format";
 
 // The dome's top radius, as a fraction of the section's width. START is exactly
 // the clamp point: the browser scales any radius pair wider than the box down to
@@ -46,6 +39,31 @@ function domePeek() {
 export default function Hero() {
   const { t } = useLanguage();
   const innerRef = useRef(null);
+  const [revealed, setRevealed] = useState(false);
+
+  // The branch-grow/blossom-bloom entrance plays via CSS animations that sit
+  // paused-at-frame-0 until this class starts them — because Hero mounts
+  // behind index.html's own preload curtain, well before the visitor can see
+  // it. Playing on mount, like a normal entrance would, burns the whole
+  // sequence while it's still covered, so the curtain lifts on a scene
+  // that's already finished. window.SakuraPreloader.lifted is the same
+  // signal lib/preloader.js uses to release Lenis; it resolves immediately
+  // if the curtain is already gone (client warm-reload, or the inline
+  // script was stripped).
+  useEffect(() => {
+    const shell = window.SakuraPreloader;
+    if (!shell) {
+      setRevealed(true);
+      return;
+    }
+    let cancelled = false;
+    shell.lifted.then(() => {
+      if (!cancelled) setRevealed(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useLayoutEffect(() => {
     const innerEl = innerRef.current;
@@ -140,23 +158,33 @@ export default function Hero() {
     // pinned across the whole page instead of releasing once Portfolio's
     // dome has risen over it.
     <div className="hero-pin">
-      <section id="inicio" className="hero">
-        <div className="hero__bg" aria-hidden="true">
-          <img src={HERO_PHOTO} alt="" />
-          <div className="hero__scrim" />
-        </div>
+      <section id="inicio" className={`hero ${revealed ? "is-revealed" : ""}`}>
+        {/* The background is no longer a photograph: two mirrored boughs,
+            entering top-left and top-right and tapering as they reach toward
+            the centered copy, grow in on load instead of a photo simply
+            being there. Same stroke-plus-blossom vocabulary as
+            BranchWatermark elsewhere on the site, just the hero's own scale
+            and its one entrance moment. The right instance starts 150ms
+            after the left rather than in lockstep, so the two sides read as
+            one branch structure growing unevenly rather than a mirrored
+            effect calling attention to itself. */}
+        <HeroCanopy revealed={revealed} />
+        <HeroCanopy revealed={revealed} flip delayMs={150} />
         {/* Thinned from 44. Every petal in the air is a layer the compositor
             moves on every scroll frame, and past about this many the hero is
             paying for density the eye reads as texture rather than as petals. */}
         <FallingPetals count={28} />
-        {/* What the fall gave up, at rest: a drift gathered in the cream at the
-            foot of the copy, where the scrim is opaque and the photo's own
-            blossoms are not already doing this job. Costs one paint, not a
-            frame. */}
-        <PetalScatter className="hero__fallen" count={7} />
+        {/* What the fall gave up, at rest: a drift gathered along the cream
+            foot of the section, now spanning both edges since the copy above
+            it is centered rather than hugging the left margin. */}
+        <PetalScatter className="hero__fallen" count={10} />
         <div className="hero__inner" ref={innerRef}>
           <div className="hero__copy">
-            <Blossom size={34} />
+            <div className="hero__mark-row">
+              <span className="hero__mark-line" aria-hidden="true" />
+              <Blossom size={40} />
+              <span className="hero__mark-line" aria-hidden="true" />
+            </div>
             <h1 className="hero__title">
               {t.hero.titleLead}
               <em>{t.hero.titleEmphasis}</em>
