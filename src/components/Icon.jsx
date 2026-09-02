@@ -61,6 +61,12 @@ const paths = {
     <path d="M7.6 3.5h-2A2.1 2.1 0 0 0 3.5 5.8C3.9 13.3 10.7 20.1 18.2 20.5a2.1 2.1 0 0 0 2.3-2.1v-2a1.4 1.4 0 0 0-1.1-1.4l-2.7-.6a1.4 1.4 0 0 0-1.4.5l-1 1.2a12.5 12.5 0 0 1-5-5l1.2-1a1.4 1.4 0 0 0 .5-1.4L9.4 4.6a1.4 1.4 0 0 0-1.4-1.1Z" />
   ),
   leaf: <path d="M5 19c8-1 12-6.5 12-14-8 0-13.5 4-14 12-.1 1 .3 1.7 2 2Z" />,
+  refresh: (
+    <>
+      <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+      <path d="M20 4v5h-5" />
+    </>
+  ),
   // A ring rather than a warning triangle: the form is asking for a missing
   // detail, not raising an alarm, and the salon's voice never shouts.
   alert: (

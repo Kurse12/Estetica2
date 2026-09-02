@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { login, AuthError } from "../lib/adminAuth";
 import Icon from "../components/Icon";
+import Blossom from "../components/Sakura";
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState("");
@@ -25,6 +26,7 @@ export default function Login({ onLogin }) {
   return (
     <div className="admin-login">
       <form className="admin-login__card" onSubmit={handleSubmit}>
+        <Blossom size={28} className="admin-login__mark" />
         <h1>Sakura Bloom — Administración</h1>
         <p className="admin-login__hint">Ingresá con tu cuenta de dueño o staff.</p>
 

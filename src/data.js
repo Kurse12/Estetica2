@@ -1,8 +1,11 @@
-// Real, verified Unsplash photography (sourced and checked to resolve).
 // Professional bios and prices are realistic placeholders pending real
 // content — see PRODUCT.md "Evidence on Hand". The brand name (Sakura Bloom)
 // is settled and is not a placeholder.
 
+import camilaReyes from "./assets/camila-reyes.jpg";
+import valentinaOrtiz from "./assets/valentina-ortiz.jpg";
+import sofiaAguirre from "./assets/sofia-aguirre.jpg";
+import marcelaDuarte from "./assets/marcela-duarte.jpg";
 import ritualDeLavado from "./assets/ritual-de-lavado.jpg";
 import peinadoConBucles from "./assets/peinado-con-bucles.jpg";
 import balayage from "./assets/balayage.jpg";
@@ -13,9 +16,6 @@ import esmaltadoNatural from "./assets/esmaltado-natural.jpg";
 import facialHidratante from "./assets/facial-hidratante.jpg";
 import maquillajeEditorial from "./assets/maquillaje-editorial.jpg";
 import maquillajeSocial from "./assets/maquillaje-social.jpg";
-
-const img = (id, w) =>
-  `https://images.unsplash.com/${id}?w=${w}&q=80&fm=jpg&fit=crop&auto=format`;
 
 export const services = [
   {
@@ -108,8 +108,8 @@ export const professionals = [
     es: { role: "Estilista senior", specialty: "Cortes y color", bio: "12 años dando forma a cabello de todo tipo, sin dos cortes iguales." },
     en: { role: "Senior stylist", specialty: "Cuts & color", bio: "12 years shaping every kind of hair — no two cuts alike." },
     years: 12,
-    photo: img("photo-1494790108377-be9c29b29330", 700),
-    photoSmall: img("photo-1494790108377-be9c29b29330", 112),
+    photo: camilaReyes,
+    photoSmall: camilaReyes,
     services: ["corte", "color"],
     branch: "palermo",
   },
@@ -120,8 +120,8 @@ export const professionals = [
     es: { role: "Técnica en uñas", specialty: "Manicura y pedicura", bio: "Precisión milimétrica y una vitrina de esmaltes que no para de crecer." },
     en: { role: "Nail technician", specialty: "Manicure & pedicure", bio: "Millimeter precision and a polish shelf that never stops growing." },
     years: 7,
-    photo: img("photo-1580489944761-15a19d654956", 700),
-    photoSmall: img("photo-1580489944761-15a19d654956", 112),
+    photo: valentinaOrtiz,
+    photoSmall: valentinaOrtiz,
     services: ["manicura", "pedicura"],
     branch: "belgrano",
   },
@@ -132,8 +132,8 @@ export const professionals = [
     es: { role: "Esteticista", specialty: "Faciales", bio: "Diagnostica tu piel antes de tocarla, y elige el tratamiento en consecuencia." },
     en: { role: "Esthetician", specialty: "Facials", bio: "Reads your skin before touching it, and picks the treatment to match." },
     years: 9,
-    photo: img("photo-1627161683077-e34782c24d81", 700),
-    photoSmall: img("photo-1627161683077-e34782c24d81", 112),
+    photo: sofiaAguirre,
+    photoSmall: sofiaAguirre,
     services: ["facial"],
     branch: "recoleta",
   },
@@ -144,8 +144,8 @@ export const professionals = [
     es: { role: "Maquilladora", specialty: "Maquillaje social y editorial", bio: "Del backstage de moda al salón: cada rostro, un plan distinto." },
     en: { role: "Makeup artist", specialty: "Event & editorial makeup", bio: "From fashion backstage to the salon floor: every face gets its own plan." },
     years: 10,
-    photo: img("photo-1573497019940-1c28c88b4f3e", 700),
-    photoSmall: img("photo-1573497019940-1c28c88b4f3e", 112),
+    photo: marcelaDuarte,
+    photoSmall: marcelaDuarte,
     services: ["maquillaje"],
     branch: "palermo",
   },

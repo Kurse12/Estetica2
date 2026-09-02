@@ -5,11 +5,17 @@ import { fetchReservasServicios, cancelarReservaServicio } from "../lib/adminApi
 import { ReservaError } from "../lib/reservasApi";
 import { startOfDay } from "../lib/availability";
 import Icon from "../components/Icon";
+import Blossom from "../components/Sakura";
 
 const dateTimeFmt = new Intl.DateTimeFormat("es-AR", {
   weekday: "short",
   day: "numeric",
   month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const timeFmt = new Intl.DateTimeFormat("es-AR", {
   hour: "2-digit",
   minute: "2-digit",
 });
@@ -20,6 +26,9 @@ export default function Dashboard({ session, onLogout }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancellingId, setCancellingId] = useState(null);
+  const [confirmingId, setConfirmingId] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [announcement, setAnnouncement] = useState("");
 
   const branch = locations.find((l) => l.id === branchId);
 
@@ -35,6 +44,8 @@ export default function Dashboard({ session, onLogout }) {
       const desde = startOfDay(new Date()).toISOString();
       const data = await fetchReservasServicios(branch.negocioId, token, { desde });
       setReservas(data);
+      setLastUpdated(new Date());
+      setAnnouncement("Lista de reservas actualizada.");
     } catch (err) {
       if (err instanceof ReservaError && err.status === 401) {
         onLogout();
@@ -56,14 +67,29 @@ export default function Dashboard({ session, onLogout }) {
     load();
   }, [load]);
 
-  async function handleCancel(id) {
+  function handleBranchChange(id) {
+    setConfirmingId(null);
+    setBranchId(id);
+  }
+
+  function requestCancel(id) {
     if (cancellingId) return;
+    setConfirmingId(id);
+  }
+
+  function abortCancel() {
+    setConfirmingId(null);
+  }
+
+  async function confirmCancel(id) {
+    setConfirmingId(null);
     setCancellingId(id);
     try {
       await cancelarReservaServicio(id);
       setReservas((prev) =>
         prev.map((r) => (r.id === id ? { ...r, estado: "cancelada" } : r))
       );
+      setAnnouncement("Reserva cancelada.");
     } catch {
       setError("No se pudo cancelar la reserva. Probá de nuevo.");
     } finally {
@@ -73,8 +99,14 @@ export default function Dashboard({ session, onLogout }) {
 
   return (
     <div className="admin-dashboard">
+      <span className="sr-only" role="status" aria-live="polite">
+        {announcement}
+      </span>
       <header className="admin-dashboard__header">
-        <h1>Reservas — Sakura Bloom</h1>
+        <div className="admin-dashboard__title">
+          <Blossom size={22} />
+          <h1>Reservas — Sakura Bloom</h1>
+        </div>
         <div className="admin-dashboard__session">
           <span>{session.email}</span>
           <button type="button" onClick={onLogout}>
@@ -83,17 +115,42 @@ export default function Dashboard({ session, onLogout }) {
         </div>
       </header>
 
-      <div className="admin-branch-tabs">
-        {locations.map((loc) => (
+      <div className="admin-dashboard__toolbar">
+        <div className="admin-dashboard__tabs-group">
+          <span className="admin-dashboard__tabs-label">Sucursal</span>
+          <div className="admin-branch-tabs" role="tablist" aria-label="Sucursal">
+            {locations.map((loc) => (
+              <button
+                key={loc.id}
+                type="button"
+                role="tab"
+                aria-selected={branchId === loc.id}
+                className={branchId === loc.id ? "is-active" : ""}
+                onClick={() => handleBranchChange(loc.id)}
+              >
+                {loc.es.area}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="admin-dashboard__freshness">
+          {lastUpdated && (
+            <span className="admin-dashboard__updated">
+              Actualizado {timeFmt.format(lastUpdated)}
+            </span>
+          )}
           <button
-            key={loc.id}
             type="button"
-            className={branchId === loc.id ? "is-active" : ""}
-            onClick={() => setBranchId(loc.id)}
+            className={`admin-dashboard__refresh ${loading ? "is-spinning" : ""}`}
+            onClick={load}
+            disabled={loading}
+            aria-label="Actualizar reservas"
+            title="Actualizar reservas"
           >
-            {loc.es.area}
+            <Icon name="refresh" size={15} />
           </button>
-        ))}
+        </div>
       </div>
 
       {error && (
@@ -136,12 +193,32 @@ export default function Dashboard({ session, onLogout }) {
                 <div className="admin-reserva__status">
                   {cancelada ? (
                     <span className="admin-badge admin-badge--cancelled">Cancelada</span>
+                  ) : confirmingId === r.id ? (
+                    <div className="admin-reserva__confirm">
+                      <span>¿Cancelar?</span>
+                      <button
+                        type="button"
+                        className="admin-reserva__confirm-yes"
+                        aria-label={`Confirmar cancelación de la reserva de ${r.clienteNombre}`}
+                        onClick={() => confirmCancel(r.id)}
+                      >
+                        Sí
+                      </button>
+                      <button
+                        type="button"
+                        className="admin-reserva__confirm-no"
+                        aria-label={`Mantener la reserva de ${r.clienteNombre}`}
+                        onClick={abortCancel}
+                      >
+                        No
+                      </button>
+                    </div>
                   ) : (
                     <button
                       type="button"
                       className="admin-reserva__cancel"
                       disabled={cancellingId === r.id}
-                      onClick={() => handleCancel(r.id)}
+                      onClick={() => requestCancel(r.id)}
                     >
                       {cancellingId === r.id ? "Cancelando…" : "Cancelar"}
                     </button>
