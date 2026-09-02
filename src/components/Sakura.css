@@ -114,6 +114,29 @@
   opacity: 0.62;
 }
 
+/* Marks the asymmetry the two mirrored instances already carry in their
+   entrance timing (Hero.jsx offsets the right one by 150ms) with a visible
+   size difference too, so a visitor who arrives after the entrance has
+   settled still reads one branch as the major structure and the other as
+   its smaller counterpart, rather than two equal boughs that only ever
+   looked uneven while they were still growing in. */
+.hero-canopy--minor {
+  width: clamp(200px, 28vw, 380px);
+  opacity: 0.42;
+}
+
+/* Kept close to the un-modified base size (300-620px) rather than pushed
+   further up: a wider bough reaches its branch curve and bud further down
+   and in toward the centered copy column, and at anything past this it
+   started landing a bud right next to the title's own closing period —
+   two dots sitting beside each other read as a stray mark, not as texture.
+   The asymmetry comes from shrinking --minor, not from growing this past
+   where the original symmetric pair already sat clear of the text. */
+.hero-canopy--major {
+  width: clamp(320px, 44vw, 640px);
+  opacity: 0.66;
+}
+
 .hero-canopy--flip {
   right: 0;
   left: auto;

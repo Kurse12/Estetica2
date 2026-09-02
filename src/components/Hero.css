@@ -59,6 +59,36 @@
   }
 }
 
+/* Sized and positioned exactly like the .falling-petals layer it wraps
+   (that layer's own inset:0 still does the actual overflow clip); this box
+   only exists to carry a group transform so the whole field can drift a few
+   px toward the cursor without touching each petal's individual fall
+   animation. --pointer-x/-y are written by the pointermove effect in
+   Hero.jsx straight onto this element, not onto :root — nothing else reads
+   them. */
+.hero__petal-field {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform: translate3d(calc(var(--pointer-x, 0) * 14px), calc(var(--pointer-y, 0) * 10px), 0);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__petal-field {
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (pointer: coarse) {
+  /* No hover on touch, so the effect has nothing to key off; the field just
+     sits at rest rather than shipping a listener that never fires. */
+  .hero__petal-field {
+    transition: none;
+  }
+}
+
 .hero__inner {
   position: relative;
   z-index: 2;
@@ -127,10 +157,13 @@
 }
 
 .hero__title {
-  /* Turned up from the site's old 4.3rem ceiling: the hero is the one display
-     moment the brand gets to make at full volume, and 4.3rem was leaving
-     headroom on the table well inside the 6rem floor-check limit. */
-  font-size: clamp(2.85rem, 6.4vw, 5rem);
+  /* Turned up again, from the 5rem ceiling: this is a centered manifesto
+     composition on purpose (see index.html's own FORM note), and a
+     manifesto's one job is to say its line at full volume. Still well
+     inside the 6rem floor-check limit, and the headline is short enough
+     (4 words plus a 2-word emphasis phrase) that the extra size doesn't
+     push it past 2 lines. */
+  font-size: clamp(3.1rem, 7vw, 5.6rem);
   line-height: 1.1;
   max-width: 14ch;
 }
@@ -139,6 +172,35 @@
   font-family: var(--font-emphasis);
   font-style: italic;
   color: var(--cherry);
+  /* Descender clearance: em inherits .hero__word's own rise animation below,
+     and italic with no reserve is how a descender gets clipped mid-transform. */
+  line-height: 1.15;
+  padding-bottom: 0.05em;
+  display: inline-block;
+}
+
+/* Each word (and the emphasis phrase, and the body/CTA that follow) sits
+   paused at frame 0 until .hero picks up is-revealed, same gating as the
+   canopy and the mark-row blossom. --word-delay is set per element inline in
+   Hero.jsx so the stagger stays driven from one place (WORD_STEP_MS) rather
+   than duplicated as a chain of nth-child rules here. */
+.hero__word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.4em);
+  animation: hero-word-rise 560ms cubic-bezier(0.16, 1, 0.3, 1) var(--word-delay, 0ms) both;
+  animation-play-state: paused;
+}
+
+.hero.is-revealed .hero__word {
+  animation-play-state: running;
+}
+
+@keyframes hero-word-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero__body {
@@ -146,6 +208,29 @@
   line-height: 1.5;
   color: var(--taupe-soft);
   max-width: 40ch;
+  opacity: 0;
+  transform: translateY(0.6em);
+  animation: hero-word-rise 560ms cubic-bezier(0.16, 1, 0.3, 1) var(--word-delay, 0ms) both;
+  animation-play-state: paused;
+}
+
+.hero.is-revealed .hero__body {
+  animation-play-state: running;
+}
+
+/* The entrance itself, kept off .hero__cta (see the comment on this wrapper
+   in Hero.jsx for why) so the magnet effect can own that element's transform
+   without a filled animation permanently holding it at translateY(0). */
+.hero__cta-reveal {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.4em);
+  animation: hero-word-rise 560ms cubic-bezier(0.16, 1, 0.3, 1) var(--word-delay, 0ms) both;
+  animation-play-state: paused;
+}
+
+.hero.is-revealed .hero__cta-reveal {
+  animation-play-state: running;
 }
 
 .hero__cta {
@@ -160,11 +245,40 @@
   padding: 1rem 1.7rem;
   border-radius: 999px;
   box-shadow: var(--shadow-soft);
-  transition: transform 0.2s ease, background 0.2s ease;
+  /* --magnet-x/-y are written by the pointermove effect in Hero.jsx while
+     the cursor is over the button, including the -2px resting lift baked
+     into --magnet-y (see MAGNET_REST_LIFT there) — kept as the one thing
+     that moves this element so a plain :hover transform can't fight a
+     JS-written inline transform over the same property. The transition
+     eases both the pull in and the return to (0, 0) on pointerleave. */
+  transform: translate3d(var(--magnet-x, 0px), var(--magnet-y, 0px), 0);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
 }
 .hero__cta:hover {
   background: var(--cherry-ink);
-  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__cta {
+    transition: background 0.2s ease;
+  }
+}
+
+/* Placed after the rules it overrides: at equal specificity (one class each)
+   the later declaration wins the cascade, and the reduced-motion opacity:1
+   below has to beat the base opacity:0 on these same selectors. Putting this
+   block up near .hero__inner's own reduced-motion rule instead — before
+   .hero__word/.hero__body/.hero__cta-reveal were even defined — left the
+   base rules' opacity:0 winning and reduced-motion visitors stuck looking at
+   an invisible hero. */
+@media (prefers-reduced-motion: reduce) {
+  .hero__word,
+  .hero__body,
+  .hero__cta-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* The landed petals gather along the whole bottom edge rather than one

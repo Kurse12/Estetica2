@@ -22,8 +22,6 @@ export const translations = {
       subtitle: "Una selección de lo que hacemos todos los días, en cabello, uñas, piel y maquillaje.",
       imageAlt: "Resultado de estética",
       carouselLabel: "Portafolio",
-      prev: "Anterior",
-      next: "Siguiente",
     },
     services: {
       title: "Servicios y precios",
@@ -165,8 +163,6 @@ export const translations = {
       title: "Results that speak for themselves",
       subtitle: "A selection of what we do every day, in hair, nails, skin, and makeup.",
       carouselLabel: "Portfolio",
-      prev: "Previous",
-      next: "Next",
       imageAlt: "Salon result",
     },
     services: {

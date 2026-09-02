@@ -3,6 +3,17 @@
 // content — see PRODUCT.md "Evidence on Hand". The brand name (Sakura Bloom)
 // is settled and is not a placeholder.
 
+import ritualDeLavado from "./assets/ritual-de-lavado.jpg";
+import peinadoConBucles from "./assets/peinado-con-bucles.jpg";
+import balayage from "./assets/balayage.jpg";
+import brushingProfesional from "./assets/brushing-profesional.jpg";
+import manicuraDePrecision from "./assets/manicura-de-precision.jpg";
+import esmaltadoTemporada from "./assets/esmaltado-de-temporada.jpg";
+import esmaltadoNatural from "./assets/esmaltado-natural.jpg";
+import facialHidratante from "./assets/facial-hidratante.jpg";
+import maquillajeEditorial from "./assets/maquillaje-editorial.jpg";
+import maquillajeSocial from "./assets/maquillaje-social.jpg";
+
 const img = (id, w) =>
   `https://images.unsplash.com/${id}?w=${w}&q=80&fm=jpg&fit=crop&auto=format`;
 
@@ -148,7 +159,11 @@ export const portfolio = [
     id: "p1",
     es: { caption: "Ritual de lavado" },
     en: { caption: "Wash ritual" },
-    photo: img("photo-1634449571010-02389ed0f9b0", 900),
+    photo: ritualDeLavado,
+    // Portrait source landing in the wide (landscape) tile — bias the cover
+    // crop toward the top so the face and hands survive instead of a
+    // center crop that would show only a strip of hair.
+    photoPosition: "50% 22%",
     serviceId: "corte",
     professionalId: "camila",
   },
@@ -156,7 +171,7 @@ export const portfolio = [
     id: "p2",
     es: { caption: "Peinado con bucles" },
     en: { caption: "Curled styling" },
-    photo: img("photo-1560869713-7d0a29430803", 900),
+    photo: peinadoConBucles,
     serviceId: "corte",
     professionalId: "camila",
   },
@@ -164,7 +179,7 @@ export const portfolio = [
     id: "p3",
     es: { caption: "Balayage" },
     en: { caption: "Balayage" },
-    photo: img("photo-1554519934-e32b1629d9ee", 900),
+    photo: balayage,
     serviceId: "color",
     professionalId: "camila",
   },
@@ -172,7 +187,7 @@ export const portfolio = [
     id: "p4",
     es: { caption: "Brushing profesional" },
     en: { caption: "Professional blow-dry" },
-    photo: img("photo-1580618672591-eb180b1a973f", 900),
+    photo: brushingProfesional,
     serviceId: "corte",
     professionalId: "camila",
   },
@@ -180,7 +195,7 @@ export const portfolio = [
     id: "p5",
     es: { caption: "Manicura de precisión" },
     en: { caption: "Precision manicure" },
-    photo: img("photo-1632345031435-8727f6897d53", 900),
+    photo: manicuraDePrecision,
     serviceId: "manicura",
     professionalId: "valentina",
   },
@@ -188,7 +203,7 @@ export const portfolio = [
     id: "p6",
     es: { caption: "Esmaltado de temporada" },
     en: { caption: "Seasonal polish" },
-    photo: img("photo-1607779097040-26e80aa78e66", 900),
+    photo: esmaltadoTemporada,
     serviceId: "manicura",
     professionalId: "valentina",
   },
@@ -196,7 +211,7 @@ export const portfolio = [
     id: "p7",
     es: { caption: "Manicura natural" },
     en: { caption: "Natural manicure" },
-    photo: img("photo-1610992015762-45dca7fa3a85", 900),
+    photo: esmaltadoNatural,
     serviceId: "manicura",
     professionalId: "valentina",
   },
@@ -204,7 +219,7 @@ export const portfolio = [
     id: "p8",
     es: { caption: "Facial hidratante" },
     en: { caption: "Hydrating facial" },
-    photo: img("photo-1616394584738-fc6e612e71b9", 900),
+    photo: facialHidratante,
     serviceId: "facial",
     professionalId: "sofia",
   },
@@ -212,7 +227,7 @@ export const portfolio = [
     id: "p9",
     es: { caption: "Maquillaje social" },
     en: { caption: "Event makeup" },
-    photo: img("photo-1630084775816-7abb7383ded5", 900),
+    photo: maquillajeSocial,
     serviceId: "maquillaje",
     professionalId: "marcela",
   },
@@ -220,7 +235,7 @@ export const portfolio = [
     id: "p10",
     es: { caption: "Maquillaje editorial" },
     en: { caption: "Editorial makeup" },
-    photo: img("photo-1636023730877-233b9237d4ec", 900),
+    photo: maquillajeEditorial,
     serviceId: "maquillaje",
     professionalId: "marcela",
   },

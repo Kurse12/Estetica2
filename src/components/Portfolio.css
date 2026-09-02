@@ -210,69 +210,167 @@
   margin-top: 0.9rem;
 }
 
-/* Broken out past the 1200px .section column: the ring is the section's whole
-   point, and percentage margins resolve against the parent's width, so this
-   widens it symmetrically without a transform that would flatten the 3D. */
-.portfolio-carousel {
+/* Broken out past the 1200px .section column: the grid is the section's
+   whole point, and percentage margins resolve against the parent's width, so
+   this widens it symmetrically. */
+.portfolio-grid {
   margin-top: 1.75rem;
   width: min(1300px, 92vw);
   margin-inline: calc(50% - min(650px, 46vw));
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* Every row shares one height regardless of which tiles sit in it — the
+     bento asymmetry below comes entirely from column spans, never row spans,
+     so there is never a mismatched row for grid-auto-flow to leave a hole
+     in. A wide tile just gets more width at the same height, reading as a
+     landscape frame beside its narrower, more portrait neighbours. */
+  grid-auto-rows: clamp(210px, 19vw, 300px);
+  gap: clamp(0.85rem, 1.6vw, 1.5rem);
 }
 
-.portfolio-book {
+.portfolio-tile {
+  position: relative;
   display: block;
-  margin: 1.5rem auto 0;
-  min-height: 44px;
-  padding: 0.65rem 1.5rem;
-  background: transparent;
-  border: 1.5px solid var(--sage-deep);
-  border-radius: 999px;
-  color: var(--sage-deep);
-  font-size: var(--fs-small);
-  transition: background 0.2s ease, color 0.2s ease;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--cream-deep);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: portfolio-tile-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* Paused until Reveal marks the section visible, same gating as every
+     other entrance in the site — a tile that animated on mount rather than
+     on scroll-into-view would finish before anyone had scrolled this far. */
+  animation-play-state: paused;
+  animation-delay: calc(var(--tile-index) * 70ms);
+  transition: box-shadow 0.3s ease;
 }
-.portfolio-book:hover {
-  background: var(--sage-deep);
+
+.reveal-page.is-visible .portfolio-tile {
+  animation-play-state: running;
+}
+
+@keyframes portfolio-tile-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.portfolio-tile--wide {
+  grid-column: span 2;
+}
+
+.portfolio-tile:hover,
+.portfolio-tile:focus-visible {
+  box-shadow: var(--shadow-deep);
+}
+
+.portfolio-tile__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.portfolio-tile:hover .portfolio-tile__image,
+.portfolio-tile:focus-visible .portfolio-tile__image {
+  transform: scale(1.06);
+}
+
+/* Rests just below the visible frame and rises with the caption on hover —
+   the gradient alone (rgba of --taupe, the site's ink) keeps every caption
+   readable regardless of how light or dark the photo under it is. */
+.portfolio-tile__caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.7rem 0.9rem 0.8rem;
+  background: linear-gradient(to top, rgba(70, 56, 58, 0.75) 0%, rgba(70, 56, 58, 0.34) 60%, transparent 100%);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.portfolio-tile:hover .portfolio-tile__caption,
+.portfolio-tile:focus-visible .portfolio-tile__caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.portfolio-tile__caption-text {
+  font-family: var(--font-emphasis);
+  font-style: italic;
+  font-size: var(--fs-body);
   color: var(--white);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portfolio-tile__caption-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  font-size: var(--fs-label);
+  letter-spacing: 0.03em;
+  color: var(--sakura-pale);
+  white-space: nowrap;
+}
+
+/* No hover on touch, so a caption that only appeared on :hover would never
+   be seen at all — shown at rest instead, same call as the reduced-fall
+   petals on mobile elsewhere in this file. */
+@media (pointer: coarse) {
+  .portfolio-tile__caption {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-tile {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .portfolio-tile:hover .portfolio-tile__image,
+  .portfolio-tile:focus-visible .portfolio-tile__image {
+    transform: none;
+  }
+}
+
+/* Bento asymmetry is a wide-viewport flourish; a two-column grid with every
+   tile the same span is what keeps this legible once the row math above no
+   longer has three columns to divide into 2 + 1. */
+@media (max-width: 900px) {
+  .portfolio-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: clamp(170px, 42vw, 240px);
+  }
+
+  .portfolio-tile--wide {
+    grid-column: span 1;
+  }
 }
 
 /* The dome already contributes --dome-peek plus its own top padding above the
    heading, so the shared .section block padding is trimmed here — otherwise the
-   enlarged type and carousel push the section past one screen. */
+   enlarged type and grid push the section past one screen. */
 .portfolio-section .section {
   padding-top: clamp(1.25rem, 2.5vw, 2rem);
   padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
-}
-
-.photo-grid {
-  margin-top: 2.75rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.75rem;
-}
-
-.photo-card {
-  margin: 0;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  background: var(--white);
-  box-shadow: var(--shadow-soft);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.photo-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-deep);
-}
-
-.photo-card img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-}
-
-.photo-card figcaption {
-  font-size: var(--fs-small);
-  color: var(--taupe-soft);
-  padding: 0.85rem 1rem 1rem;
 }

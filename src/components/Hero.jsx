@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { onSmoothScroll } from "../lib/smoothScroll";
 import Icon from "./Icon";
@@ -22,6 +22,27 @@ const DOME_R_REST = 0.27;
 const DOME_EASE = 2.2;
 const DOME_TRAVEL = 0.7; // of viewport height
 
+// Max pull toward the cursor, in px, along each axis. Y carries the CTA's
+// resting -2px hover lift as its own baseline (see the pointermove handler
+// below) rather than leaving that lift to a separate :hover rule — a CSS
+// :hover transform and a JS-written inline transform both sit at the same
+// cascade tier, so whichever runs last would just clobber the other's value
+// instead of combining with it.
+const MAGNET_RANGE_X = 5;
+const MAGNET_RANGE_Y = 4;
+const MAGNET_REST_LIFT = -2;
+
+// How far apart each headline word rises after the last one, and how long
+// after mount the first word goes — a beat after the mark-row blossom
+// (hero-mark-bloom, 80ms delay + 420ms) so the title doesn't fire in the same
+// instant as the logo, while still starting well inside the canopy's own
+// 850ms stem draw rather than waiting for it to finish. Body and the CTA's
+// reveal wrapper are just the next two slots in the same beat: the emphasis
+// phrase takes slot leadWords.length, body is leadWords.length + 1, the CTA
+// leadWords.length + 2.
+const WORD_STEP_MS = 220;
+const WORD_START_MS = 180;
+
 function domeRadius(t) {
   const w = window.innerWidth;
   return (DOME_R_REST + (DOME_R_START - DOME_R_REST) * (1 - t) ** DOME_EASE) * w;
@@ -39,7 +60,17 @@ function domePeek() {
 export default function Hero() {
   const { t } = useLanguage();
   const innerRef = useRef(null);
+  const ctaRef = useRef(null);
+  const sectionRef = useRef(null);
+  const petalFieldRef = useRef(null);
   const [revealed, setRevealed] = useState(false);
+
+  // Split once per language rather than on every render — the words
+  // themselves only change when the visitor flips the language toggle.
+  const leadWords = useMemo(() => t.hero.titleLead.trim().split(/\s+/), [t.hero.titleLead]);
+  const emphasisDelay = leadWords.length * WORD_STEP_MS;
+  const bodyDelay = (leadWords.length + 1) * WORD_STEP_MS;
+  const ctaRevealDelay = (leadWords.length + 2) * WORD_STEP_MS;
 
   // The branch-grow/blossom-bloom entrance plays via CSS animations that sit
   // paused-at-frame-0 until this class starts them — because Hero mounts
@@ -151,6 +182,106 @@ export default function Hero() {
     };
   }, []);
 
+  // The CTA pulls a few px toward the cursor while the pointer is over it —
+  // reserved for fine pointers (touch has no hover to key the pull off) and
+  // skipped under reduced motion. Written the same way the dome radius above
+  // is: straight onto the one element that reads it, rAF-batched, no React
+  // state for a value that changes on every pointer sample.
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+
+    let raf = null;
+    let targetX = 0;
+    let targetY = 0;
+
+    function apply() {
+      raf = null;
+      el.style.setProperty("--magnet-x", `${targetX.toFixed(2)}px`);
+      el.style.setProperty("--magnet-y", `${targetY.toFixed(2)}px`);
+    }
+
+    function schedule() {
+      if (raf == null) raf = requestAnimationFrame(apply);
+    }
+
+    function onPointerMove(e) {
+      const rect = el.getBoundingClientRect();
+      const nx = (e.clientX - rect.left) / rect.width - 0.5;
+      const ny = (e.clientY - rect.top) / rect.height - 0.5;
+      targetX = nx * MAGNET_RANGE_X;
+      targetY = MAGNET_REST_LIFT + ny * MAGNET_RANGE_Y;
+      schedule();
+    }
+
+    function onPointerLeave() {
+      targetX = 0;
+      targetY = 0;
+      schedule();
+    }
+
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerleave", onPointerLeave);
+    return () => {
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerleave", onPointerLeave);
+      if (raf != null) cancelAnimationFrame(raf);
+      el.style.removeProperty("--magnet-x");
+      el.style.removeProperty("--magnet-y");
+    };
+  }, []);
+
+  // The falling-petal layer drifts a few px toward the cursor — same
+  // fine-pointer/reduced-motion gating as the CTA's magnet above, written
+  // the same rAF-batched, no-React-state way, just onto a different element
+  // over a wider trigger area (the whole section instead of one button).
+  useEffect(() => {
+    const sectionEl = sectionRef.current;
+    const fieldEl = petalFieldRef.current;
+    if (!sectionEl || !fieldEl) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+
+    let raf = null;
+    let targetX = 0;
+    let targetY = 0;
+
+    function apply() {
+      raf = null;
+      fieldEl.style.setProperty("--pointer-x", targetX.toFixed(3));
+      fieldEl.style.setProperty("--pointer-y", targetY.toFixed(3));
+    }
+
+    function schedule() {
+      if (raf == null) raf = requestAnimationFrame(apply);
+    }
+
+    function onPointerMove(e) {
+      const rect = sectionEl.getBoundingClientRect();
+      targetX = Math.max(-1, Math.min(1, ((e.clientX - rect.left) / rect.width - 0.5) * 2));
+      targetY = Math.max(-1, Math.min(1, ((e.clientY - rect.top) / rect.height - 0.5) * 2));
+      schedule();
+    }
+
+    function onPointerLeave() {
+      targetX = 0;
+      targetY = 0;
+      schedule();
+    }
+
+    sectionEl.addEventListener("pointermove", onPointerMove);
+    sectionEl.addEventListener("pointerleave", onPointerLeave);
+    return () => {
+      sectionEl.removeEventListener("pointermove", onPointerMove);
+      sectionEl.removeEventListener("pointerleave", onPointerLeave);
+      if (raf != null) cancelAnimationFrame(raf);
+      fieldEl.style.removeProperty("--pointer-x");
+      fieldEl.style.removeProperty("--pointer-y");
+    };
+  }, []);
+
   return (
     // position:sticky releases at the bottom edge of its containing block —
     // that's this wrapper's own box, not <main>. Without it, .hero's nearest
@@ -158,7 +289,7 @@ export default function Hero() {
     // pinned across the whole page instead of releasing once Portfolio's
     // dome has risen over it.
     <div className="hero-pin">
-      <section id="inicio" className={`hero ${revealed ? "is-revealed" : ""}`}>
+      <section id="inicio" className={`hero ${revealed ? "is-revealed" : ""}`} ref={sectionRef}>
         {/* The background is no longer a photograph: two mirrored boughs,
             entering top-left and top-right and tapering as they reach toward
             the centered copy, grow in on load instead of a photo simply
@@ -167,13 +298,23 @@ export default function Hero() {
             and its one entrance moment. The right instance starts 150ms
             after the left rather than in lockstep, so the two sides read as
             one branch structure growing unevenly rather than a mirrored
-            effect calling attention to itself. */}
-        <HeroCanopy revealed={revealed} />
-        <HeroCanopy revealed={revealed} flip delayMs={150} />
-        {/* Thinned from 44. Every petal in the air is a layer the compositor
-            moves on every scroll frame, and past about this many the hero is
-            paying for density the eye reads as texture rather than as petals. */}
-        <FallingPetals count={28} />
+            effect calling attention to itself — sized unevenly too now
+            (--minor/--major, in Hero.css), so the asymmetry reads at a
+            glance instead of only revealing itself once the entrance has
+            finished. Mobile keeps both at the shared base size: the
+            exaggerated size gap is a wide-viewport flourish, not something
+            worth the added visual noise on a phone. */}
+        <HeroCanopy revealed={revealed} className="hero-canopy--minor" />
+        <HeroCanopy revealed={revealed} flip delayMs={150} className="hero-canopy--major" />
+        {/* Wrapped so the whole field can drift a few px toward the cursor
+            (see the pointermove effect above) without touching the falling
+            animation each petal already runs on its own layer. */}
+        <div className="hero__petal-field" ref={petalFieldRef}>
+          {/* Thinned from 44. Every petal in the air is a layer the compositor
+              moves on every scroll frame, and past about this many the hero is
+              paying for density the eye reads as texture rather than as petals. */}
+          <FallingPetals count={28} />
+        </div>
         {/* What the fall gave up, at rest: a drift gathered along the cream
             foot of the section, now spanning both edges since the copy above
             it is centered rather than hugging the left margin. */}
@@ -185,16 +326,53 @@ export default function Hero() {
               <Blossom size={40} />
               <span className="hero__mark-line" aria-hidden="true" />
             </div>
+            {/* Each word rises on its own beat instead of the whole line
+                arriving at once, timed to start just after the mark blooms
+                and land well before the canopy has finished blossoming
+                behind it — see WORD_STEP_MS/WORD_START_MS above. */}
             <h1 className="hero__title">
-              {t.hero.titleLead}
-              <em>{t.hero.titleEmphasis}</em>
-              {t.hero.titleTail}
+              {leadWords.flatMap((word, i) => [
+                // The space is a plain sibling text node, not part of the
+                // span: a trailing space *inside* an inline-block gets
+                // trimmed as trailing whitespace of that box's own line, so
+                // nesting it there silently glues each word to the next.
+                <span
+                  key={`${word}-${i}`}
+                  className="hero__word"
+                  style={{ "--word-delay": `${WORD_START_MS + i * WORD_STEP_MS}ms` }}
+                >
+                  {word}
+                </span>,
+                " ",
+              ])}
+              <span
+                className="hero__word hero__word--emphasis"
+                style={{ "--word-delay": `${WORD_START_MS + emphasisDelay}ms` }}
+              >
+                <em>{t.hero.titleEmphasis}</em>
+                {t.hero.titleTail}
+              </span>
             </h1>
-            <p className="hero__body">{t.hero.body}</p>
-            <a href="#reservar" className="hero__cta">
-              {t.hero.cta}
-              <Icon name="arrowRight" size={18} />
-            </a>
+            <p className="hero__body" style={{ "--word-delay": `${WORD_START_MS + bodyDelay}ms` }}>
+              {t.hero.body}
+            </p>
+            {/* The entrance fade/rise lives on this wrapper, not on .hero__cta
+                itself: a CSS animation's held value for a property outranks
+                any other declaration for that same property (even an inline
+                style), so if the entrance animated the button's own
+                transform, it would permanently block the magnet effect's
+                transform once the entrance finished and its `both` fill mode
+                kept holding translateY(0). Keeping .hero__cta free of any
+                `animation` lets the magnet effect own that property outright. */}
+            <span
+              className="hero__cta-reveal"
+              style={{ "--word-delay": `${WORD_START_MS + ctaRevealDelay}ms` }}
+            >
+              <a href="#reservar" className="hero__cta" ref={ctaRef}>
+                {t.hero.cta}
+                <Icon name="arrowRight" size={18} />
+              </a>
+            </span>
           </div>
         </div>
       </section>

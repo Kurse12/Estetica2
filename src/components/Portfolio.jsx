@@ -1,27 +1,30 @@
-import { useEffect, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { portfolio } from "../data";
 import Reveal from "./Reveal";
 import Blossom, { BranchWatermark, FallingPetals } from "./Sakura";
-import Carousel3D from "./Carousel3D";
+import Icon from "./Icon";
 import "./Portfolio.css";
+
+// Every 5th tile runs wide (2 columns) so the grid reads as an editorial
+// bento layout — one feature photo plus a companion, then a trio of equal
+// tiles — rather than a uniform wall. Row-only spans (never row spans too)
+// so this pattern can never leave a gap for grid-auto-flow to fight with.
+function isWideTile(index) {
+  return index % 5 === 0;
+}
 
 export default function Portfolio({ onBook }) {
   const { t, lang } = useLanguage();
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
 
-  useEffect(() => {
-    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
-
-  const carouselItems = portfolio.map((item) => ({
+  const gridItems = portfolio.map((item) => ({
+    id: item.id,
     src: item.photo,
+    position: item.photoPosition,
     caption: item[lang]?.caption,
     alt: `${t.portfolio.imageAlt} — ${item[lang]?.caption ?? ""}`,
+    serviceId: item.serviceId,
+    professionalId: item.professionalId,
   }));
-
-  const activeItem = portfolio[activeIndex];
 
   return (
     <section id="trabajos" className="portfolio-section">
@@ -69,29 +72,36 @@ export default function Portfolio({ onBook }) {
         <h2 className="section-kicker-free-heading">{t.portfolio.title}</h2>
         <p className="portfolio-subtitle">{t.portfolio.subtitle}</p>
 
-        <Carousel3D
-          className="portfolio-carousel"
-          items={carouselItems}
-          itemWidth={420}
-          itemRatio={0.95}
-          autoRotateDuration={90}
-          paused={reducedMotion}
-          onActiveIndexChange={setActiveIndex}
-          groupLabel={t.portfolio.carouselLabel}
-          prevLabel={t.portfolio.prev}
-          nextLabel={t.portfolio.next}
-        />
-
-        {/* Routes the front panel straight into the wizard with its service
-            and professional already picked, instead of leaving "I want that"
-            with nowhere to go but a cold start at the booking section. */}
-        <button
-          type="button"
-          className="portfolio-book"
-          onClick={() => onBook(activeItem.serviceId, activeItem.professionalId)}
-        >
-          {t.services.bookThis}
-        </button>
+        <div className="portfolio-grid" aria-label={t.portfolio.carouselLabel}>
+          {/* Every tile books straight into the wizard with its own service
+              and professional already picked — a grid has no single "active"
+              panel the way the old carousel did, so the action moves onto
+              whichever photo she's actually looking at. */}
+          {gridItems.map((item, index) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`portfolio-tile${isWideTile(index) ? " portfolio-tile--wide" : ""}`}
+              style={{ "--tile-index": index }}
+              onClick={() => onBook(item.serviceId, item.professionalId)}
+            >
+              <img
+                src={item.src}
+                alt={item.alt}
+                loading="lazy"
+                className="portfolio-tile__image"
+                style={item.position ? { objectPosition: item.position } : undefined}
+              />
+              <span className="portfolio-tile__caption">
+                <span className="portfolio-tile__caption-text">{item.caption}</span>
+                <span className="portfolio-tile__caption-cta">
+                  {t.services.bookThis}
+                  <Icon name="arrowRight" size={15} />
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
       </Reveal>
     </section>
   );
