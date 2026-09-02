@@ -1,0 +1,265 @@
+.admin-login {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  padding: 24px;
+}
+
+.admin-login__card {
+  width: min(380px, 100%);
+  background: var(--white);
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-login__card h1 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: var(--cherry-ink);
+  margin: 0 0 4px;
+}
+
+.admin-login__hint {
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  margin: 0 0 14px;
+}
+
+.admin-login__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cherry-ink);
+  background: var(--sakura-pale);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: var(--fs-small);
+  margin: 0 0 14px;
+}
+
+.admin-login__card label {
+  font-size: var(--fs-label);
+  color: var(--taupe);
+  margin-top: 10px;
+}
+
+.admin-login__card input {
+  font: inherit;
+  font-size: var(--fs-body);
+  padding: 10px 12px;
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  color: var(--taupe);
+}
+
+.admin-login__card input:focus-visible {
+  outline: 2px solid var(--sakura-deep);
+  outline-offset: 1px;
+}
+
+.admin-login__card button {
+  margin-top: 20px;
+  padding: 11px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--cherry);
+  color: var(--white);
+  font: inherit;
+  font-size: var(--fs-body);
+  cursor: pointer;
+}
+
+.admin-login__card button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-dashboard {
+  min-height: 100dvh;
+  background: var(--cream);
+  padding: 24px clamp(16px, 4vw, 48px) 64px;
+  color: var(--taupe);
+  font-family: var(--font-body);
+}
+
+.admin-dashboard__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.admin-dashboard__header h1 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--cherry-ink);
+  margin: 0;
+}
+
+.admin-dashboard__session {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+}
+
+.admin-dashboard__session button {
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--cherry-ink);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin-branch-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.admin-branch-tabs button {
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--taupe);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
+.admin-branch-tabs button.is-active {
+  background: var(--cherry);
+  border-color: var(--cherry);
+  color: var(--white);
+}
+
+.admin-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cherry-ink);
+  background: var(--sakura-pale);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: var(--fs-small);
+  margin: 0 0 16px;
+  width: fit-content;
+}
+
+.admin-empty {
+  color: var(--taupe-soft);
+  font-size: var(--fs-body);
+}
+
+.admin-reserva-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-reserva {
+  background: var(--white);
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1.1fr 1.3fr 1.6fr auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-reserva.is-cancelled {
+  opacity: 0.55;
+}
+
+.admin-reserva__when {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-small);
+  color: var(--sakura-deep);
+  white-space: nowrap;
+}
+
+.admin-reserva__what strong {
+  display: block;
+  font-family: var(--font-emphasis);
+  color: var(--taupe);
+}
+
+.admin-reserva__what span {
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+}
+
+.admin-reserva__who {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  gap: 2px;
+}
+
+.admin-reserva__who span:first-child {
+  color: var(--taupe);
+  font-weight: 600;
+}
+
+.admin-reserva__who span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.admin-reserva__cancel {
+  border: 1px solid var(--sakura-deep);
+  background: var(--white);
+  color: var(--cherry-ink);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-reserva__cancel:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-badge {
+  font-size: var(--fs-micro);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.admin-badge--cancelled {
+  background: var(--cream-line);
+  color: var(--taupe-soft);
+}
+
+@media (max-width: 720px) {
+  .admin-reserva {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+}

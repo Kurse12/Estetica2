@@ -80,6 +80,15 @@ export function serviceApiId(branchId, serviceId) {
   return SERVICE_API_IDS[branchId]?.[serviceId] ?? null;
 }
 
+// Reverse of serviceApiId: the admin dashboard gets a service UUID back from
+// the backend and needs the local service (for its name) to display it.
+export function serviceByApiId(branchId, apiId) {
+  const localId = Object.entries(SERVICE_API_IDS[branchId] ?? {}).find(
+    ([, id]) => id === apiId
+  )?.[0];
+  return services.find((s) => s.id === localId) ?? null;
+}
+
 export const professionals = [
   {
     id: "camila",
