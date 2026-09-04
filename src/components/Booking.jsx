@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
-import { professionals, services, locations, serviceApiId } from "../data";
+import { professionals, services, locations, serviceApiId, priceFmt } from "../data";
 import {
   slotPeriod,
   isSlotInPast,
@@ -466,7 +466,7 @@ export default function Booking({ preset }) {
                       >
                         <Icon name={s.icon} size={20} />
                         <span className="pick-service__name">{s[lang].name}</span>
-                        <span className="pick-service__price numerals">${s.price}</span>
+                        <span className="pick-service__price numerals">${priceFmt.format(s.price)}</span>
                       </button>
                     ))}
                   </div>
@@ -620,7 +620,7 @@ export default function Booking({ preset }) {
                     </div>
                     <div>
                       <dt>{t.booking.review.price}</dt>
-                      <dd className="numerals">${service?.price}</dd>
+                      <dd className="numerals">${service?.price != null ? priceFmt.format(service.price) : ""}</dd>
                     </div>
                   </dl>
 

@@ -1,6 +1,9 @@
-// Professional bios and prices are realistic placeholders pending real
-// content — see PRODUCT.md "Evidence on Hand". The brand name (Sakura Bloom)
-// is settled and is not a placeholder.
+// Professional bios are realistic placeholders pending real content — see
+// PRODUCT.md "Evidence on Hand". The brand name (Sakura Bloom) is settled and
+// is not a placeholder. Service prices are real, provided by the owner
+// (2026-09-03), in Argentine pesos.
+
+export const priceFmt = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 });
 
 import camilaReyes from "./assets/camila-reyes.jpg";
 import valentinaOrtiz from "./assets/valentina-ortiz.jpg";
@@ -24,7 +27,7 @@ export const services = [
     es: { name: "Corte y styling", desc: "Corte a medida, lavado y peinado final." },
     en: { name: "Cut & styling", desc: "Tailored cut, wash, and finished style." },
     duration: 50,
-    price: 28,
+    price: 40000,
   },
   {
     id: "color",
@@ -32,7 +35,7 @@ export const services = [
     es: { name: "Color y balayage", desc: "Color completo, mechas o balayage a mano alzada." },
     en: { name: "Color & balayage", desc: "Full color, highlights, or hand-painted balayage." },
     duration: 120,
-    price: 85,
+    price: 120000,
   },
   {
     id: "manicura",
@@ -40,7 +43,7 @@ export const services = [
     es: { name: "Manicura semipermanente", desc: "Esmaltado de larga duración, cutículas incluidas." },
     en: { name: "Gel manicure", desc: "Long-wear polish, cuticle care included." },
     duration: 45,
-    price: 22,
+    price: 25000,
   },
   {
     id: "pedicura",
@@ -48,7 +51,7 @@ export const services = [
     es: { name: "Pedicura spa", desc: "Exfoliación, masaje e hidratación completa." },
     en: { name: "Spa pedicure", desc: "Exfoliation, massage, and full hydration." },
     duration: 55,
-    price: 30,
+    price: 35000,
   },
   {
     id: "facial",
@@ -56,7 +59,7 @@ export const services = [
     es: { name: "Facial hidratante", desc: "Limpieza profunda y mascarilla según tu piel." },
     en: { name: "Hydrating facial", desc: "Deep cleanse and mask matched to your skin." },
     duration: 60,
-    price: 48,
+    price: 45000,
   },
   {
     id: "maquillaje",
@@ -64,7 +67,7 @@ export const services = [
     es: { name: "Maquillaje social", desc: "Look completo para eventos, fotos o salidas." },
     en: { name: "Event makeup", desc: "Full look for events, photos, or a night out." },
     duration: 45,
-    price: 40,
+    price: 45000,
   },
 ];
 

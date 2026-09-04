@@ -1,5 +1,5 @@
 import { useLanguage } from "../i18n/LanguageContext";
-import { services } from "../data";
+import { services, priceFmt } from "../data";
 import Icon from "./Icon";
 import Reveal from "./Reveal";
 import Blossom, { BranchWatermark, PetalScatter } from "./Sakura";
@@ -40,7 +40,7 @@ export default function Services({ onBookService }) {
                 <span className="price-row__duration">
                   {service.duration} {t.services.duration}
                 </span>
-                <span className="price-row__price numerals">${service.price}</span>
+                <span className="price-row__price numerals">${priceFmt.format(service.price)}</span>
               </button>
             </li>
           ))}
