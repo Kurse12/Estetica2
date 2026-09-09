@@ -283,9 +283,14 @@
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   display: grid;
-  grid-template-columns: 1.1fr 1.3fr 1.6fr auto;
+  grid-template-columns: 1.1fr 1.3fr 1.5fr auto auto;
   align-items: center;
   gap: 14px;
+}
+
+.admin-reserva--compact {
+  grid-template-columns: auto 1.2fr 1.3fr auto auto;
+  padding: 10px 14px;
 }
 
 .admin-reserva.is-cancelled {
@@ -329,28 +334,6 @@
   display: flex;
   align-items: center;
   gap: 5px;
-}
-
-.admin-reserva__cancel {
-  border: 1px solid var(--sakura-deep);
-  background: var(--white);
-  color: var(--cherry-ink);
-  border-radius: var(--radius-sm);
-  padding: 7px 14px;
-  font: inherit;
-  font-size: var(--fs-small);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 0.15s ease;
-}
-
-.admin-reserva__cancel:hover:not(:disabled) {
-  background: var(--sakura-pale);
-}
-
-.admin-reserva__cancel:disabled {
-  opacity: 0.6;
-  cursor: default;
 }
 
 .admin-reserva__confirm {
@@ -397,6 +380,7 @@
   font-size: var(--fs-micro);
   padding: 4px 10px;
   border-radius: 999px;
+  white-space: nowrap;
 }
 
 .admin-badge--cancelled {
@@ -404,10 +388,602 @@
   color: var(--taupe);
 }
 
+.admin-badge--pendiente {
+  background: var(--gold-light);
+  color: #5c4a24;
+}
+
+.admin-badge--confirmada {
+  background: var(--sage-pale);
+  color: var(--sage-deep);
+}
+
+.admin-badge--realizada {
+  background: var(--branch-soft);
+  color: var(--branch);
+}
+
+@media (max-width: 900px) {
+  .admin-reserva,
+  .admin-reserva--compact {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 720px) {
-  .admin-reserva {
+  .admin-reserva,
+  .admin-reserva--compact {
     grid-template-columns: 1fr;
     align-items: flex-start;
+  }
+}
+
+/* ---- Section nav (Agenda / Calendario / Servicios / Profesionales) ---- */
+
+.admin-section-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.admin-section-tabs button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--taupe);
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-section-tabs button:hover:not(.is-active) {
+  background: var(--sakura-pale);
+  border-color: var(--sakura-deep);
+}
+
+.admin-section-tabs button.is-active {
+  background: var(--cherry-ink);
+  border-color: var(--cherry-ink);
+  color: var(--white);
+}
+
+/* ---- Agenda filters ---------------------------------------------------- */
+
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  background: var(--white);
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.admin-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-filters__field--grow {
+  flex: 1 1 220px;
+}
+
+.admin-filters__field label {
+  font-size: var(--fs-micro);
+  color: var(--taupe-soft);
+  letter-spacing: 0.02em;
+}
+
+.admin-filters__field select,
+.admin-filters__field input[type="date"] {
+  font: inherit;
+  font-size: var(--fs-small);
+  padding: 7px 10px;
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  color: var(--taupe);
+}
+
+.admin-filters__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  background: var(--cream);
+  padding: 0 10px;
+  color: var(--taupe-soft);
+}
+
+.admin-filters__search input {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: var(--fs-small);
+  padding: 7px 0;
+  color: var(--taupe);
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-filters__search input:focus {
+  outline: none;
+}
+
+.admin-filters__clear {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: none;
+  color: var(--cherry-ink);
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+  padding: 8px 4px;
+}
+
+.admin-filters__clear:hover {
+  text-decoration: underline;
+}
+
+/* ---- Reserva action cluster --------------------------------------------- */
+
+.admin-reserva__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.admin-reserva__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.admin-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--taupe);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font: inherit;
+  font-size: var(--fs-micro);
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-action:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-action--wsp {
+  border-color: var(--sage-deep);
+  color: var(--sage-deep);
+}
+
+.admin-action--wsp:hover {
+  background: var(--sage-pale);
+}
+
+.admin-action--confirm {
+  border-color: var(--sage-deep);
+  background: var(--sage-deep);
+  color: var(--white);
+}
+
+.admin-action--confirm:hover:not(:disabled) {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+.admin-action--complete {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: var(--white);
+}
+
+.admin-action--complete:hover:not(:disabled) {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+  color: var(--taupe);
+}
+
+.admin-action--cancel {
+  border-color: var(--sakura-deep);
+  color: var(--cherry-ink);
+}
+
+.admin-action--cancel:hover:not(:disabled) {
+  background: var(--sakura-pale);
+}
+
+.admin-reserva__row-error {
+  font-size: var(--fs-micro);
+  color: var(--cherry-ink);
+  margin: 0;
+  text-align: right;
+}
+
+/* ---- Servicios / Profesionales CRUD ------------------------------------- */
+
+.admin-crud__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.admin-crud__toolbar h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  color: var(--cherry-ink);
+  margin: 0;
+}
+
+.admin-crud__add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  background: var(--cherry);
+  color: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 9px 16px;
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.admin-crud__add:hover {
+  background: var(--cherry-ink);
+}
+
+.admin-crud-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-crud-item {
+  background: var(--white);
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-crud-item__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.admin-crud-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--sakura-pale);
+  color: var(--cherry-ink);
+}
+
+.admin-crud-item__main strong {
+  font-family: var(--font-emphasis);
+  color: var(--taupe);
+}
+
+.admin-crud-item__meta {
+  display: flex;
+  gap: 12px;
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  margin-top: 2px;
+}
+
+.admin-crud-item__desc {
+  font-size: var(--fs-small);
+  color: var(--taupe-soft);
+  margin: 4px 0 0;
+  max-width: 48ch;
+}
+
+.admin-crud-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.admin-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--taupe);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-icon-btn:hover {
+  background: var(--sakura-pale);
+  border-color: var(--sakura-deep);
+  color: var(--cherry-ink);
+}
+
+.admin-icon-btn--danger:hover {
+  background: var(--sakura-pale);
+  border-color: var(--cherry);
+  color: var(--cherry-ink);
+}
+
+/* ---- Inline create/edit form -------------------------------------------- */
+
+.admin-form {
+  background: var(--cream);
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-form h3 {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  color: var(--cherry-ink);
+  margin: 0;
+}
+
+.admin-form__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cherry-ink);
+  background: var(--sakura-pale);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: var(--fs-small);
+  margin: 0;
+}
+
+.admin-form__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: var(--fs-label);
+  color: var(--taupe-soft);
+  flex: 1 1 160px;
+}
+
+.admin-form input,
+.admin-form textarea {
+  font: inherit;
+  font-size: var(--fs-body);
+  padding: 8px 10px;
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--taupe);
+  resize: vertical;
+}
+
+.admin-form input:focus-visible,
+.admin-form textarea:focus-visible {
+  outline: 2px solid var(--sakura-deep);
+  outline-offset: 1px;
+}
+
+.admin-form__buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.admin-form__cancel {
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--taupe);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
+.admin-form__cancel:hover:not(:disabled) {
+  background: var(--sakura-pale);
+}
+
+.admin-form__save {
+  border: none;
+  background: var(--cherry);
+  color: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 8px 18px;
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.admin-form__save:hover:not(:disabled) {
+  background: var(--cherry-ink);
+}
+
+.admin-form__save:disabled,
+.admin-form__cancel:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---- Calendario ---------------------------------------------------------- */
+
+.admin-calendar {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.admin-calendar__grid-wrap {
+  background: var(--white);
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.admin-calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.admin-calendar__header strong {
+  font-family: var(--font-display);
+  color: var(--cherry-ink);
+  text-transform: capitalize;
+}
+
+.admin-calendar__header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--cream-line);
+  background: var(--white);
+  color: var(--cherry-ink);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.admin-calendar__header button:hover {
+  background: var(--sakura-pale);
+}
+
+.admin-calendar__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: var(--fs-micro);
+  color: var(--taupe-soft);
+  margin-bottom: 6px;
+}
+
+.admin-calendar__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.admin-calendar__day {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  background: none;
+  border-radius: var(--radius-sm);
+  color: var(--taupe);
+  font: inherit;
+  font-size: var(--fs-small);
+  cursor: pointer;
+}
+
+.admin-calendar__day.is-outside {
+  color: var(--taupe-soft);
+  opacity: 0.4;
+}
+
+.admin-calendar__day:hover {
+  background: var(--sakura-pale);
+}
+
+.admin-calendar__day.is-selected {
+  background: var(--cherry);
+  color: var(--white);
+}
+
+.admin-calendar__day.has-turnos:not(.is-selected) {
+  border-color: var(--sakura-deep);
+}
+
+.admin-calendar__dot {
+  position: absolute;
+  bottom: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cherry);
+}
+
+.admin-calendar__day.is-selected .admin-calendar__dot {
+  background: var(--white);
+}
+
+.admin-calendar__day-panel {
+  background: var(--white);
+  border: 1px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  min-height: 200px;
+}
+
+.admin-calendar__day-panel h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  color: var(--cherry-ink);
+  margin: 0 0 14px;
+  text-transform: capitalize;
+}
+
+@media (max-width: 860px) {
+  .admin-calendar {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -415,9 +991,17 @@
 .admin-dashboard__session button:focus-visible,
 .admin-branch-tabs button:focus-visible,
 .admin-dashboard__refresh:focus-visible,
-.admin-reserva__cancel:focus-visible,
 .admin-reserva__confirm-yes:focus-visible,
-.admin-reserva__confirm-no:focus-visible {
+.admin-reserva__confirm-no:focus-visible,
+.admin-section-tabs button:focus-visible,
+.admin-action:focus-visible,
+.admin-icon-btn:focus-visible,
+.admin-crud__add:focus-visible,
+.admin-form__save:focus-visible,
+.admin-form__cancel:focus-visible,
+.admin-calendar__day:focus-visible,
+.admin-calendar__header button:focus-visible,
+.admin-filters__clear:focus-visible {
   outline: 2px solid var(--sakura-deep);
   outline-offset: 1px;
 }

@@ -37,7 +37,7 @@ export const translations = {
     },
     booking: {
       title: "Reservá tu turno",
-      subtitle: "Elegí profesional, servicio y horario, y confirmá el turno.",
+      subtitle: "Elegí servicio, profesional y horario, y confirmá el turno.",
       stepOf: "Paso {n} de {total}",
       branch: {
         label: "Sede",
@@ -65,11 +65,12 @@ export const translations = {
       },
       calendar: {
         title: "Elegí fecha y horario",
-        prevWeek: "Semana anterior",
-        nextWeek: "Semana siguiente",
+        prevMonth: "Mes anterior",
+        nextMonth: "Mes siguiente",
         closedBadge: "Cerrado",
         closedNote: "Ese día la sede elegida está cerrada. Elegí otro.",
         pastBadge: "Pasado",
+        noSlotsBadge: "Sin turnos",
         noSlots: "Sin turnos disponibles ese día para esta combinación. Probá otra fecha.",
         noSlotsToday: "Ya no quedan horarios para hoy. Probá con mañana.",
         loadingSlots: "Buscando horarios disponibles…",
@@ -113,11 +114,11 @@ export const translations = {
         },
       },
       confirmed: {
-        title: "¡Turno confirmado!",
-        subtitle: "Guardá el número de reserva: es lo que te va a pedir el salón.",
+        title: "¡Turno solicitado!",
+        subtitle: "Guardá el número de reserva: es lo que te va a pedir el salón. Te confirmamos por correo en breve.",
         ticketNo: "Número de reserva",
         another: "Reservar otro turno",
-        emailNote: "Te enviamos la confirmación por correo. El salón también fue notificado.",
+        emailNote: "Te enviamos los detalles por correo. Te avisamos apenas el salón confirme tu turno.",
       },
     },
     footer: {
@@ -179,7 +180,7 @@ export const translations = {
     },
     booking: {
       title: "Book your appointment",
-      subtitle: "Pick your professional, service and time, then confirm.",
+      subtitle: "Pick your service, professional and time, then confirm.",
       stepOf: "Step {n} of {total}",
       branch: {
         label: "Location",
@@ -207,11 +208,12 @@ export const translations = {
       },
       calendar: {
         title: "Choose date and time",
-        prevWeek: "Previous week",
-        nextWeek: "Next week",
+        prevMonth: "Previous month",
+        nextMonth: "Next month",
         closedBadge: "Closed",
         closedNote: "The chosen location is closed that day. Pick another.",
         pastBadge: "Past",
+        noSlotsBadge: "No slots",
         noSlots: "No slots open that day for this pick. Try another date.",
         noSlotsToday: "No times left today. Try tomorrow.",
         loadingSlots: "Looking up open times…",
@@ -255,11 +257,11 @@ export const translations = {
         },
       },
       confirmed: {
-        title: "Appointment confirmed!",
-        subtitle: "Keep the booking number: it is what the salon will ask you for.",
+        title: "Appointment requested!",
+        subtitle: "Keep the booking number: it is what the salon will ask you for. We'll confirm it by email shortly.",
         ticketNo: "Booking number",
         another: "Book another appointment",
-        emailNote: "We sent the confirmation to your email. The salon was notified too.",
+        emailNote: "We sent the details to your email. We'll let you know as soon as the salon confirms your appointment.",
       },
     },
     footer: {

@@ -41,6 +41,38 @@ export function addDays(date, days) {
   return d;
 }
 
+export function startOfMonth(date) {
+  const d = startOfDay(date);
+  d.setDate(1);
+  return d;
+}
+
+// setMonth() on a date parked at day 31 can spill into the month after the
+// one being asked for (31 Jan + 1 month lands on 3 Mar, not Feb) — pinning to
+// day 1 first is what keeps "next month" from ever skipping a month.
+export function addMonths(date, months) {
+  const d = startOfMonth(date);
+  d.setMonth(d.getMonth() + months);
+  return d;
+}
+
+// A rectangular grid, Monday-first, sized to whatever the month actually
+// needs (5 or 6 rows) rather than always 6 — a 6th row that's entirely next
+// month's padding reads as a layout bug, not a calendar. Cells outside the
+// target month are still real Dates (so the grid tiles cleanly); the caller
+// decides whether to render them as blank padding.
+export function getMonthGrid(monthDate) {
+  const first = startOfMonth(monthDate);
+  const firstOffset = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate();
+  const totalCells = Math.ceil((firstOffset + daysInMonth) / 7) * 7;
+  const gridStart = addDays(first, -firstOffset);
+  return Array.from({ length: totalCells }, (_, i) => {
+    const date = addDays(gridStart, i);
+    return { date, inMonth: date.getMonth() === monthDate.getMonth() };
+  });
+}
+
 export function isSameDay(a, b) {
   return startOfDay(a).getTime() === startOfDay(b).getTime();
 }

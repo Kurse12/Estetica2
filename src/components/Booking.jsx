@@ -9,8 +9,9 @@ import {
   isPastDay,
   isSameDay,
   dateToISO,
-  addDays,
-  startOfDay,
+  startOfMonth,
+  addMonths,
+  getMonthGrid,
 } from "../lib/availability";
 import { fetchDisponibilidad, crearReservaServicio, ReservaError } from "../lib/reservasApi";
 import Icon from "./Icon";
@@ -18,7 +19,7 @@ import Reveal from "./Reveal";
 import Blossom, { BranchWatermark, FallingPetals, PetalScatter, SakuraDivider } from "./Sakura";
 import "./Booking.css";
 
-const STEPS = ["professional", "service", "datetime", "review"];
+const STEPS = ["service", "professional", "datetime", "review"];
 
 // Deliberately permissive: the job of this check is to catch the typo the
 // visitor can still fix, not to adjudicate RFC 5322.
@@ -75,18 +76,18 @@ export default function Booking({ preset }) {
   const [branchId, setBranchId] = useState(locations[0].id);
   const [professionalId, setProfessionalId] = useState(null);
   const [serviceId, setServiceId] = useState(null);
-  const [weekStart, setWeekStart] = useState(() => startOfDay(new Date()));
+  const [viewMonth, setViewMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [contact, setContact] = useState({ name: "", email: "", phone: "" });
   const [errors, setErrors] = useState({});
   const [attempted, setAttempted] = useState(false);
   const [confirmed, setConfirmed] = useState(null);
-  const [slots, setSlots] = useState([]);
-  const [slotsRaw, setSlotsRaw] = useState([]);
-  const [slotsLoading, setSlotsLoading] = useState(false);
-  const [slotsError, setSlotsError] = useState(false);
-  const [slotsRefreshKey, setSlotsRefreshKey] = useState(0);
+  // Keyed by "<branch>|<professional>|<service>|<isoDate>" rather than plain
+  // date, so a stale answer fetched for a professional or service the visitor
+  // has since changed away from can never be read back as if it still applied
+  // — it just becomes an unused entry instead of a source of a wrong badge.
+  const [dayAvailability, setDayAvailability] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
@@ -107,13 +108,13 @@ export default function Booking({ preset }) {
       // silently hiding them from a picker filtered to whatever branch was
       // already selected.
       const presetPro = professionals.find((p) => p.id === preset.professionalId);
-      if (presetPro) setBranchId(presetPro.branch);
+      if (presetPro) setBranchId(presetPro.homeBranch);
     }
     if (preset.serviceId) setServiceId(preset.serviceId);
     setConfirmed(null);
     if (preset.professionalId && preset.serviceId) setStepIndex(2);
-    else if (preset.professionalId) setStepIndex(1);
-    else if (preset.serviceId) setStepIndex(0);
+    else if (preset.professionalId) setStepIndex(0);
+    else if (preset.serviceId) setStepIndex(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preset?.nonce]);
 
@@ -121,7 +122,7 @@ export default function Booking({ preset }) {
   const professional = professionals.find((p) => p.id === professionalId);
   const service = services.find((s) => s.id === serviceId);
   const branchProfessionals = useMemo(
-    () => professionals.filter((p) => p.branch === branchId),
+    () => professionals.filter((p) => p.profesionalId[branchId]),
     [branchId]
   );
 
@@ -134,69 +135,106 @@ export default function Booking({ preset }) {
         .replace("{n}", String(stepIndex + 1))
         .replace("{total}", String(STEPS.length))}: ${t.booking.steps[STEPS[stepIndex]]}`;
 
-  const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
+  const monthGrid = useMemo(() => getMonthGrid(viewMonth), [viewMonth]);
 
-  // The strip shows seven bare numbers, so without this the visitor has no way
-  // to tell which month they are paging into — and a week that straddles a
-  // month boundary names both.
-  const weekLabel = useMemo(() => {
-    const first = days[0];
-    const last = days[6];
+  // Any Monday works as the reference week — only the weekday name is read
+  // back out — so the header row can be built without touching viewMonth.
+  const weekdayLabels = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(locale, { weekday: "short" })),
+    [locale]
+  );
+
+  const monthLabel = useMemo(() => {
     const cap = (text) => text.charAt(0).toUpperCase() + text.slice(1);
-    const month = (d) => cap(d.toLocaleDateString(locale, { month: "long" }));
-    if (first.getMonth() === last.getMonth()) return `${month(first)} ${first.getFullYear()}`;
-    if (first.getFullYear() === last.getFullYear())
-      return `${month(first)} – ${month(last)} ${last.getFullYear()}`;
-    return `${month(first)} ${first.getFullYear()} – ${month(last)} ${last.getFullYear()}`;
-  }, [days, locale]);
+    return cap(viewMonth.toLocaleDateString(locale, { month: "long", year: "numeric" }));
+  }, [viewMonth, locale]);
 
-  // The week can never reach into the past: the back arrow stops at the week
-  // that contains today, and today's own already-gone slots drop out below.
-  const atFirstWeek = useMemo(() => {
-    const today = startOfDay(new Date());
-    return startOfDay(weekStart) <= today;
-  }, [weekStart]);
+  // The month view can never reach into the past: the back arrow stops at the
+  // month that contains today.
+  const atFirstMonth = useMemo(() => startOfMonth(viewMonth).getTime() <= startOfMonth(new Date()).getTime(), [
+    viewMonth,
+  ]);
 
-  // The backend hands back exact bookable start times for this professional +
-  // service + day (it already excludes anything already reserved), so there
-  // is nothing left to compute here beyond turning each ISO timestamp into
-  // the "HH:mm" label the rest of the wizard works with, and dropping
-  // today's slots that have already elapsed — the endpoint returns those too.
-  useEffect(() => {
-    const negocioId = branch?.negocioId;
-    const profApiId = professional?.profesionalId;
-    const svcApiId = serviceId ? serviceApiId(branchId, serviceId) : null;
-    if (!selectedDate || !negocioId || !profApiId || !svcApiId) {
-      setSlots([]);
-      setSlotsRaw([]);
-      setSlotsError(false);
-      return;
-    }
-    let cancelled = false;
-    setSlotsLoading(true);
-    setSlotsError(false);
-    fetchDisponibilidad(negocioId, profApiId, dateToISO(selectedDate), svcApiId)
+  // Scopes every cached availability answer to the professional + service +
+  // branch it was actually fetched for, so switching any of those never
+  // shows a stale day as open or shut for the new combination.
+  const scopeKey = `${branchId}|${professional?.profesionalId?.[branchId] ?? ""}|${
+    serviceId ? serviceApiId(branchId, serviceId) : ""
+  }`;
+
+  // One GET per open, not-yet-past day fetches that day's exact bookable
+  // start times (the backend has no month-level endpoint), so the calendar
+  // can grey out any day with nothing open before the visitor ever taps it.
+  // A small worker pool keeps a full month from firing 20+ requests at once.
+  function fetchOneDay(date, negocioId, profApiId, svcApiId, cancelledRef) {
+    const key = `${scopeKey}|${dateToISO(date)}`;
+    setDayAvailability((prev) => ({ ...prev, [key]: { status: "pending", slots: [] } }));
+    return fetchDisponibilidad(negocioId, profApiId, dateToISO(date), svcApiId)
       .then((iso) => {
-        if (cancelled) return;
+        if (cancelledRef?.current) return;
         const labels = iso.map(
           (s) => `${String(new Date(s).getUTCHours()).padStart(2, "0")}:${String(new Date(s).getUTCMinutes()).padStart(2, "0")}`
         );
-        setSlotsRaw(labels);
-        setSlots(labels.filter((slot) => !isSlotInPast(selectedDate, slot)));
+        setDayAvailability((prev) => ({ ...prev, [key]: { status: "loaded", slots: labels } }));
       })
       .catch(() => {
-        if (cancelled) return;
-        setSlotsRaw([]);
-        setSlots([]);
-        setSlotsError(true);
-      })
-      .finally(() => {
-        if (!cancelled) setSlotsLoading(false);
+        if (cancelledRef?.current) return;
+        setDayAvailability((prev) => ({ ...prev, [key]: { status: "error", slots: [] } }));
       });
+  }
+
+  useEffect(() => {
+    const negocioId = branch?.negocioId;
+    const profApiId = professional?.profesionalId?.[branchId];
+    const svcApiId = serviceId ? serviceApiId(branchId, serviceId) : null;
+    if (!negocioId || !profApiId || !svcApiId) return;
+
+    const candidates = monthGrid
+      .filter((cell) => cell.inMonth)
+      .map((cell) => cell.date)
+      .filter((d) => isBookableDay(d, new Date(), branch.closedWeekdays))
+      .filter((d) => !dayAvailability[`${scopeKey}|${dateToISO(d)}`]);
+    if (candidates.length === 0) return;
+
+    const cancelledRef = { current: false };
+    let next = 0;
+    async function worker() {
+      while (!cancelledRef.current && next < candidates.length) {
+        await fetchOneDay(candidates[next++], negocioId, profApiId, svcApiId, cancelledRef);
+      }
+    }
+    Array.from({ length: 5 }, worker);
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
     };
-  }, [selectedDate, branchId, branch, professional, serviceId, slotsRefreshKey]);
+    // dayAvailability is read only to see which days still need a fetch;
+    // reacting to it here (this same effect is what writes it) would spin
+    // the scan in a loop instead of running once per scope/month change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monthGrid, branchId, branch, professional, serviceId, scopeKey]);
+
+  const selectedEntry = selectedDate ? dayAvailability[`${scopeKey}|${dateToISO(selectedDate)}`] : null;
+  const slotsRaw = selectedEntry?.status === "loaded" ? selectedEntry.slots : [];
+  const slots = useMemo(() => slotsRaw.filter((slot) => !isSlotInPast(selectedDate, slot)), [slotsRaw, selectedDate]);
+  const slotsLoading = Boolean(selectedDate) && (!selectedEntry || selectedEntry.status === "pending");
+  const slotsError = selectedEntry?.status === "error";
+
+  function cellStatus(date) {
+    if (isPastDay(date)) return "past";
+    if (isClosedDay(date, branch.closedWeekdays)) return "closed";
+    const entry = dayAvailability[`${scopeKey}|${dateToISO(date)}`];
+    if (!entry || entry.status === "pending") return "pending";
+    if (entry.status === "error") return "error";
+    return entry.slots.length > 0 ? "available" : "empty";
+  }
+
+  function dayAriaLabel(date, status) {
+    const base = date.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" });
+    if (status === "past") return `${base} — ${t.booking.calendar.pastBadge}`;
+    if (status === "closed") return `${base} — ${t.booking.calendar.closedBadge}`;
+    if (status === "empty") return `${base} — ${t.booking.calendar.noSlotsBadge}`;
+    return base;
+  }
 
   // A slot picked for a professional/service/date that has since changed (or
   // was just booked out from under the visitor) should not silently survive
@@ -248,7 +286,7 @@ export default function Booking({ preset }) {
     // at the new one, and a booked-but-invisible person is worse than an
     // empty step — clear the date/slot with them since both were only ever
     // valid against the old branch's hours.
-    if (professional && professional.branch !== id) {
+    if (professional && !professional.profesionalId[id]) {
       setProfessionalId(null);
       setServiceId(null);
     }
@@ -280,7 +318,7 @@ export default function Booking({ preset }) {
     try {
       const reserva = await crearReservaServicio({
         negocioId: branch.negocioId,
-        profesionalId: professional.profesionalId,
+        profesionalId: professional.profesionalId[branchId],
         servicioId: serviceApiId(branchId, serviceId),
         inicio: `${dateISO}T${selectedSlot}:00.000Z`,
         clienteNombre: contact.name.trim(),
@@ -306,7 +344,9 @@ export default function Booking({ preset }) {
       if (err instanceof ReservaError && err.status === 409) {
         setSubmitError(t.booking.review.slotTaken);
         setSelectedSlot(null);
-        setSlotsRefreshKey((k) => k + 1);
+        // The cached answer for this day is now wrong — someone just took the
+        // slot it said was open — so it is re-fetched rather than trusted.
+        fetchOneDay(selectedDate, branch.negocioId, professional.profesionalId[branchId], serviceApiId(branchId, serviceId));
         goTo(2);
       } else {
         setSubmitError(t.booking.review.submitError);
@@ -320,7 +360,7 @@ export default function Booking({ preset }) {
     setConfirmed(null);
     setProfessionalId(null);
     setServiceId(null);
-    setWeekStart(startOfDay(new Date()));
+    setViewMonth(startOfMonth(new Date()));
     setSelectedDate(null);
     setSelectedSlot(null);
     setContact({ name: "", email: "", phone: "" });
@@ -331,8 +371,8 @@ export default function Booking({ preset }) {
   }
 
   const canAdvance = {
-    0: Boolean(professionalId),
-    1: Boolean(serviceId),
+    0: Boolean(serviceId),
+    1: Boolean(professionalId),
     2: Boolean(selectedDate && selectedSlot),
   };
 
@@ -413,6 +453,34 @@ export default function Booking({ preset }) {
             <div className="booking-panel">
               {stepIndex === 0 && (
                 <div className="pick-grid">
+                  <h3>{t.booking.choose.serviceTitle}</h3>
+                  {professional && (
+                    <p className="pick-grid__hint">
+                      {t.booking.choose.serviceHint}
+                      <button type="button" className="link-button" onClick={() => goTo(1)}>
+                        {t.booking.choose.changeProfessional}
+                      </button>
+                    </p>
+                  )}
+                  <div className="pick-grid__options pick-grid__options--services">
+                    {offeredServices.map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        className={`pick-service ${serviceId === s.id ? "is-selected" : ""}`}
+                        onClick={() => setServiceId(s.id)}
+                      >
+                        <Icon name={s.icon} size={20} />
+                        <span className="pick-service__name">{s[lang].name}</span>
+                        <span className="pick-service__price numerals">${priceFmt.format(s.price)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {stepIndex === 1 && (
+                <div className="pick-grid">
                   <h3>{t.booking.choose.professionalTitle}</h3>
                   {service && (
                     <p className="pick-grid__hint">
@@ -445,96 +513,76 @@ export default function Booking({ preset }) {
                 </div>
               )}
 
-              {stepIndex === 1 && (
-                <div className="pick-grid">
-                  <h3>{t.booking.choose.serviceTitle}</h3>
-                  {professional && (
-                    <p className="pick-grid__hint">
-                      {t.booking.choose.serviceHint}
-                      <button type="button" className="link-button" onClick={() => goTo(0)}>
-                        {t.booking.choose.changeProfessional}
-                      </button>
-                    </p>
-                  )}
-                  <div className="pick-grid__options pick-grid__options--services">
-                    {offeredServices.map((s) => (
-                      <button
-                        key={s.id}
-                        type="button"
-                        className={`pick-service ${serviceId === s.id ? "is-selected" : ""}`}
-                        onClick={() => setServiceId(s.id)}
-                      >
-                        <Icon name={s.icon} size={20} />
-                        <span className="pick-service__name">{s[lang].name}</span>
-                        <span className="pick-service__price numerals">${priceFmt.format(s.price)}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {stepIndex === 2 && (
                 <div className="date-picker">
                   <h3>{t.booking.calendar.title}</h3>
-                  {/* The week arrows sit on their own line with the month rather
-                      than flanking the days. Beside a seven-column grid they were
-                      the two things a phone had no room for: at 375px the right
-                      arrow landed 51px past the card's edge, inside a container
-                      that clips — so the only control for reaching next week was
-                      invisible and unreachable on the device most likely to need
-                      it. Up here they also gain the width to be real targets, and
-                      the strip finally says which month it is showing. */}
-                  <div className="date-strip">
-                    <div className="date-strip__head">
-                      <p className="date-strip__month">{weekLabel}</p>
-                      <div className="date-strip__nav">
+                  {/* A month at a time, not a week: a visitor comparing a few
+                      candidate days needs to see them on one screen, and a day
+                      with nothing bookable is disabled outright rather than
+                      merely greyed once the actual availability for that day
+                      comes back from the fetch below. */}
+                  <div className="month-cal">
+                    <div className="month-cal__head">
+                      <p className="month-cal__label">{monthLabel}</p>
+                      <div className="month-cal__nav">
                         <button
                           type="button"
-                          className="date-strip__arrow"
-                          disabled={atFirstWeek}
-                          onClick={() => setWeekStart((d) => addDays(d, -7))}
-                          aria-label={t.booking.calendar.prevWeek}
+                          className="month-cal__arrow"
+                          disabled={atFirstMonth}
+                          onClick={() => setViewMonth((m) => addMonths(m, -1))}
+                          aria-label={t.booking.calendar.prevMonth}
                         >
                           <Icon name="chevronLeft" size={18} />
                         </button>
                         <button
                           type="button"
-                          className="date-strip__arrow"
-                          onClick={() => setWeekStart((d) => addDays(d, 7))}
-                          aria-label={t.booking.calendar.nextWeek}
+                          className="month-cal__arrow"
+                          onClick={() => setViewMonth((m) => addMonths(m, 1))}
+                          aria-label={t.booking.calendar.nextMonth}
                         >
                           <Icon name="chevronRight" size={18} />
                         </button>
                       </div>
                     </div>
-                    <div className="date-strip__days">
-                      {days.map((d) => {
+                    <div className="month-cal__weekdays" aria-hidden="true">
+                      {weekdayLabels.map((label, i) => (
+                        <span key={i}>{label}</span>
+                      ))}
+                    </div>
+                    <div className="month-cal__grid">
+                      {monthGrid.map(({ date: d, inMonth }) => {
                         const iso = dateToISO(d);
+                        if (!inMonth) return <span key={iso} className="month-cal__pad" aria-hidden="true" />;
+                        const status = cellStatus(d);
+                        const disabled = status === "past" || status === "closed" || status === "empty";
                         const isSelected = selectedDate && dateToISO(selectedDate) === iso;
-                        const closed = isClosedDay(d, branch.closedWeekdays);
-                        const past = isPastDay(d);
-                        const bookable = isBookableDay(d, new Date(), branch.closedWeekdays);
                         return (
                           <button
                             key={iso}
                             type="button"
-                            disabled={!bookable}
-                            className={`date-chip ${isSelected ? "is-selected" : ""} ${bookable ? "" : "is-unavailable"}`}
+                            disabled={disabled}
+                            className={`month-day ${isSelected ? "is-selected" : ""} ${
+                              disabled ? "is-unavailable" : ""
+                            } ${status === "pending" ? "is-pending" : ""}`}
+                            aria-label={dayAriaLabel(d, status)}
                             onClick={() => {
                               setSelectedDate(d);
                               setSelectedSlot(null);
                             }}
                           >
-                            <span className="date-chip__dow">
-                              {d.toLocaleDateString(locale, { weekday: "short" })}
-                            </span>
-                            <span className="date-chip__num numerals">{d.getDate()}</span>
-                            {!bookable && (
-                              <span className="date-chip__badge">
-                                {past ? t.booking.calendar.pastBadge : t.booking.calendar.closedBadge}
-                              </span>
+                            <span className="month-day__num numerals">{d.getDate()}</span>
+                            {status === "past" && (
+                              <span className="month-day__badge">{t.booking.calendar.pastBadge}</span>
                             )}
-                            {closed && !past && <span className="sr-only">{t.booking.calendar.closedNote}</span>}
+                            {status === "closed" && (
+                              <span className="month-day__badge">{t.booking.calendar.closedBadge}</span>
+                            )}
+                            {status === "empty" && (
+                              <span className="month-day__badge">{t.booking.calendar.noSlotsBadge}</span>
+                            )}
+                            {status === "closed" && (
+                              <span className="sr-only">{t.booking.calendar.closedNote}</span>
+                            )}
                           </button>
                         );
                       })}
@@ -591,12 +639,12 @@ export default function Booking({ preset }) {
                       <dd>{branch[lang].name}</dd>
                     </div>
                     <div>
-                      <dt>{t.booking.review.professional}</dt>
-                      <dd>{professional?.name}</dd>
-                    </div>
-                    <div>
                       <dt>{t.booking.review.service}</dt>
                       <dd>{service?.[lang].name}</dd>
+                    </div>
+                    <div>
+                      <dt>{t.booking.review.professional}</dt>
+                      <dd>{professional?.name}</dd>
                     </div>
                     <div>
                       <dt>{t.booking.review.date}</dt>
@@ -784,12 +832,12 @@ function ConfirmedCard({ confirmed, t, lang, onReset }) {
               </dd>
             </div>
             <div>
-              <dt>{t.booking.review.professional}</dt>
-              <dd>{confirmed.professional?.name}</dd>
-            </div>
-            <div>
               <dt>{t.booking.review.service}</dt>
               <dd>{confirmed.service?.[lang].name}</dd>
+            </div>
+            <div>
+              <dt>{t.booking.review.professional}</dt>
+              <dd>{confirmed.professional?.name}</dd>
             </div>
             <div>
               <dt>{t.booking.review.date}</dt>

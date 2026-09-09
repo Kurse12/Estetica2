@@ -1,32 +1,45 @@
-import { useCallback, useEffect, useState } from "react";
-import { locations, professionals, serviceByApiId } from "../data";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { locations, professionalByApiId, serviceByApiId } from "../data";
 import { getValidAccessToken } from "../lib/adminAuth";
-import { fetchReservasServicios, cancelarReservaServicio } from "../lib/adminApi";
+import {
+  fetchReservasServicios,
+  cancelarReservaServicio,
+  confirmarReservaServicio,
+  completarReservaServicio,
+  fetchServicios,
+  createServicio,
+  updateServicio,
+  removeServicio,
+  fetchProfesionales,
+  createProfesional,
+  updateProfesional,
+  removeProfesional,
+} from "../lib/adminApi";
 import { ReservaError } from "../lib/reservasApi";
-import { startOfDay } from "../lib/availability";
 import Icon from "../components/Icon";
 import Blossom from "../components/Sakura";
+import AgendaView from "./AgendaView";
+import CalendarioView from "./CalendarioView";
+import ServiciosView from "./ServiciosView";
+import ProfesionalesView from "./ProfesionalesView";
 
-const dateTimeFmt = new Intl.DateTimeFormat("es-AR", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const timeFmt = new Intl.DateTimeFormat("es-AR", { hour: "2-digit", minute: "2-digit" });
 
-const timeFmt = new Intl.DateTimeFormat("es-AR", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
+const TABS = [
+  { id: "agenda", label: "Agenda", icon: "list" },
+  { id: "calendario", label: "Calendario", icon: "calendar" },
+  { id: "servicios", label: "Servicios", icon: "tag" },
+  { id: "profesionales", label: "Profesionales", icon: "users" },
+];
 
 export default function Dashboard({ session, onLogout }) {
   const [branchId, setBranchId] = useState(locations[0].id);
+  const [tab, setTab] = useState("agenda");
   const [reservas, setReservas] = useState([]);
+  const [servicios, setServicios] = useState([]);
+  const [profesionales, setProfesionales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [cancellingId, setCancellingId] = useState(null);
-  const [confirmingId, setConfirmingId] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [announcement, setAnnouncement] = useState("");
 
@@ -41,11 +54,17 @@ export default function Dashboard({ session, onLogout }) {
       return;
     }
     try {
-      const desde = startOfDay(new Date()).toISOString();
-      const data = await fetchReservasServicios(branch.negocioId, token, { desde });
-      setReservas(data);
+      // No "desde": la agenda muestra todos los turnos, pasados y futuros.
+      const [reservasData, serviciosData, profesionalesData] = await Promise.all([
+        fetchReservasServicios(branch.negocioId, token),
+        fetchServicios(branch.negocioId),
+        fetchProfesionales(branch.negocioId),
+      ]);
+      setReservas(reservasData);
+      setServicios(serviciosData);
+      setProfesionales(profesionalesData);
       setLastUpdated(new Date());
-      setAnnouncement("Lista de reservas actualizada.");
+      setAnnouncement("Datos actualizados.");
     } catch (err) {
       if (err instanceof ReservaError && err.status === 401) {
         onLogout();
@@ -54,9 +73,11 @@ export default function Dashboard({ session, onLogout }) {
       if (err instanceof ReservaError && err.status === 403) {
         setError("Tu cuenta no tiene acceso a esta sucursal.");
       } else {
-        setError("No se pudieron cargar las reservas.");
+        setError("No se pudieron cargar los datos.");
       }
       setReservas([]);
+      setServicios([]);
+      setProfesionales([]);
     } finally {
       setLoading(false);
     }
@@ -68,34 +89,101 @@ export default function Dashboard({ session, onLogout }) {
   }, [load]);
 
   function handleBranchChange(id) {
-    setConfirmingId(null);
     setBranchId(id);
   }
 
-  function requestCancel(id) {
-    if (cancellingId) return;
-    setConfirmingId(id);
+  async function handleConfirmReserva(id) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    const updated = await confirmarReservaServicio(id, token);
+    setReservas((prev) => prev.map((r) => (r.id === id ? updated : r)));
   }
 
-  function abortCancel() {
-    setConfirmingId(null);
+  async function handleCompleteReserva(id) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    const updated = await completarReservaServicio(id, token);
+    setReservas((prev) => prev.map((r) => (r.id === id ? updated : r)));
   }
 
-  async function confirmCancel(id) {
-    setConfirmingId(null);
-    setCancellingId(id);
-    try {
-      await cancelarReservaServicio(id);
-      setReservas((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, estado: "cancelada" } : r))
-      );
-      setAnnouncement("Reserva cancelada.");
-    } catch {
-      setError("No se pudo cancelar la reserva. Probá de nuevo.");
-    } finally {
-      setCancellingId(null);
+  async function handleCancelReserva(id) {
+    const updated = await cancelarReservaServicio(id);
+    setReservas((prev) => prev.map((r) => (r.id === id ? updated : r)));
+  }
+
+  function sortByNombre(list) {
+    return [...list].sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }
+
+  async function handleCreateServicio(dto) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    const created = await createServicio(branch.negocioId, token, dto);
+    setServicios((prev) => sortByNombre([...prev, created]));
+  }
+
+  async function handleUpdateServicio(id, dto) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    const updated = await updateServicio(branch.negocioId, id, token, dto);
+    setServicios((prev) => sortByNombre(prev.map((s) => (s.id === id ? updated : s))));
+  }
+
+  async function handleDeleteServicio(id) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    await removeServicio(branch.negocioId, id, token);
+    setServicios((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  async function handleCreateProfesional(dto) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    const created = await createProfesional(branch.negocioId, token, dto);
+    setProfesionales((prev) => sortByNombre([...prev, created]));
+  }
+
+  async function handleUpdateProfesional(id, dto) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    const updated = await updateProfesional(branch.negocioId, id, token, dto);
+    setProfesionales((prev) => sortByNombre(prev.map((p) => (p.id === id ? updated : p))));
+  }
+
+  async function handleDeleteProfesional(id) {
+    const token = await getValidAccessToken();
+    if (!token) return onLogout();
+    await removeProfesional(branch.negocioId, id, token);
+    setProfesionales((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  // Backend records for the branch, falling back to the static public-site
+  // content when a reserva points at a servicio/profesional that was since
+  // soft-deleted (findAll only returns activo:true rows, so it would
+  // otherwise be missing here and the agenda would show a blank name).
+  const servicioById = useMemo(() => {
+    const map = {};
+    for (const s of servicios) map[s.id] = s;
+    for (const r of reservas) {
+      if (!map[r.servicioId]) {
+        const fallback = serviceByApiId(branchId, r.servicioId);
+        if (fallback) map[r.servicioId] = { id: r.servicioId, nombre: fallback.es.name };
+      }
     }
-  }
+    return map;
+  }, [servicios, reservas, branchId]);
+
+  const profesionalById = useMemo(() => {
+    const map = {};
+    for (const p of profesionales) map[p.id] = p;
+    for (const r of reservas) {
+      if (!map[r.profesionalId]) {
+        const fallback = professionalByApiId(r.profesionalId);
+        if (fallback) map[r.profesionalId] = { id: r.profesionalId, nombre: fallback.name };
+      }
+    }
+    return map;
+  }, [profesionales, reservas]);
 
   return (
     <div className="admin-dashboard">
@@ -105,7 +193,7 @@ export default function Dashboard({ session, onLogout }) {
       <header className="admin-dashboard__header">
         <div className="admin-dashboard__title">
           <Blossom size={22} />
-          <h1>Reservas — Sakura Bloom</h1>
+          <h1>Sakura Bloom — Admin</h1>
         </div>
         <div className="admin-dashboard__session">
           <span>{session.email}</span>
@@ -136,22 +224,36 @@ export default function Dashboard({ session, onLogout }) {
 
         <div className="admin-dashboard__freshness">
           {lastUpdated && (
-            <span className="admin-dashboard__updated">
-              Actualizado {timeFmt.format(lastUpdated)}
-            </span>
+            <span className="admin-dashboard__updated">Actualizado {timeFmt.format(lastUpdated)}</span>
           )}
           <button
             type="button"
             className={`admin-dashboard__refresh ${loading ? "is-spinning" : ""}`}
             onClick={load}
             disabled={loading}
-            aria-label="Actualizar reservas"
-            title="Actualizar reservas"
+            aria-label="Actualizar"
+            title="Actualizar"
           >
             <Icon name="refresh" size={15} />
           </button>
         </div>
       </div>
+
+      <nav className="admin-section-tabs" role="tablist" aria-label="Sección">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            className={tab === t.id ? "is-active" : ""}
+            onClick={() => setTab(t.id)}
+          >
+            <Icon name={t.icon} size={15} />
+            {t.label}
+          </button>
+        ))}
+      </nav>
 
       {error && (
         <p className="admin-error" role="alert">
@@ -161,73 +263,46 @@ export default function Dashboard({ session, onLogout }) {
       )}
 
       {loading ? (
-        <p className="admin-empty">Cargando reservas…</p>
-      ) : reservas.length === 0 ? (
-        <p className="admin-empty">No hay reservas próximas en {branch.es.area}.</p>
+        <p className="admin-empty">Cargando…</p>
       ) : (
-        <ul className="admin-reserva-list">
-          {reservas.map((r) => {
-            const profesional = professionals.find((p) => p.profesionalId === r.profesionalId);
-            const servicio = serviceByApiId(branchId, r.servicioId);
-            const cancelada = r.estado === "cancelada";
-            return (
-              <li key={r.id} className={`admin-reserva ${cancelada ? "is-cancelled" : ""}`}>
-                <div className="admin-reserva__when">
-                  <Icon name="calendar" size={16} />
-                  {dateTimeFmt.format(new Date(r.inicio))}
-                </div>
-                <div className="admin-reserva__what">
-                  <strong>{servicio?.es.name ?? "Servicio"}</strong>
-                  <span> con {profesional?.name ?? "—"}</span>
-                </div>
-                <div className="admin-reserva__who">
-                  <span>{r.clienteNombre}</span>
-                  <span>{r.clienteEmail}</span>
-                  {r.clienteTelefono && (
-                    <span>
-                      <Icon name="phone" size={13} />
-                      {r.clienteTelefono}
-                    </span>
-                  )}
-                </div>
-                <div className="admin-reserva__status">
-                  {cancelada ? (
-                    <span className="admin-badge admin-badge--cancelled">Cancelada</span>
-                  ) : confirmingId === r.id ? (
-                    <div className="admin-reserva__confirm">
-                      <span>¿Cancelar?</span>
-                      <button
-                        type="button"
-                        className="admin-reserva__confirm-yes"
-                        aria-label={`Confirmar cancelación de la reserva de ${r.clienteNombre}`}
-                        onClick={() => confirmCancel(r.id)}
-                      >
-                        Sí
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-reserva__confirm-no"
-                        aria-label={`Mantener la reserva de ${r.clienteNombre}`}
-                        onClick={abortCancel}
-                      >
-                        No
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="admin-reserva__cancel"
-                      disabled={cancellingId === r.id}
-                      onClick={() => requestCancel(r.id)}
-                    >
-                      {cancellingId === r.id ? "Cancelando…" : "Cancelar"}
-                    </button>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          {tab === "agenda" && (
+            <AgendaView
+              reservas={reservas}
+              servicioById={servicioById}
+              profesionalById={profesionalById}
+              onConfirm={handleConfirmReserva}
+              onComplete={handleCompleteReserva}
+              onCancel={handleCancelReserva}
+            />
+          )}
+          {tab === "calendario" && (
+            <CalendarioView
+              reservas={reservas}
+              servicioById={servicioById}
+              profesionalById={profesionalById}
+              onConfirm={handleConfirmReserva}
+              onComplete={handleCompleteReserva}
+              onCancel={handleCancelReserva}
+            />
+          )}
+          {tab === "servicios" && (
+            <ServiciosView
+              servicios={servicios}
+              onCreate={handleCreateServicio}
+              onUpdate={handleUpdateServicio}
+              onDelete={handleDeleteServicio}
+            />
+          )}
+          {tab === "profesionales" && (
+            <ProfesionalesView
+              profesionales={profesionales}
+              onCreate={handleCreateProfesional}
+              onUpdate={handleUpdateProfesional}
+              onDelete={handleDeleteProfesional}
+            />
+          )}
+        </>
       )}
     </div>
   );

@@ -313,97 +313,123 @@
   font-weight: 600;
 }
 
-.date-strip {
+.month-cal {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
 }
-.date-strip__head {
+.month-cal__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
-.date-strip__month {
+.month-cal__label {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--fs-body-lg);
   color: var(--taupe);
 }
-.date-strip__nav {
+.month-cal__nav {
   display: flex;
   gap: 0.4rem;
 }
-.date-strip__arrow {
+.month-cal__arrow {
   flex-shrink: 0;
   background: var(--cream-line);
   color: var(--taupe);
   border: none;
   border-radius: 50%;
-  /* 44px, not 34: this is the control that reaches next week, and a thumb is
-     the input that reaches for it most. */
+  /* 44px, not 34: this is the control that reaches the next month, and a
+     thumb is the input that reaches for it most. */
   width: 44px;
   height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.date-strip__days {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-.date-chip {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-  min-height: 44px;
-  padding: 0.6rem 0.3rem;
+.month-cal__arrow:disabled {
   background: var(--cream);
-  border: 2px solid var(--cream-line);
-  border-radius: var(--radius-sm);
-  color: var(--taupe);
-}
-.date-chip__dow {
-  font-size: var(--fs-micro);
-  text-transform: uppercase;
-  color: var(--taupe-soft);
-}
-.date-chip__num {
-  font-size: var(--fs-body-lg);
-  font-family: var(--font-display);
-}
-.date-chip.is-selected {
-  border-color: var(--cherry);
-  background: var(--cherry);
-  color: var(--white);
-}
-.date-chip.is-selected .date-chip__dow {
-  color: var(--sakura-pale);
-}
-.date-chip.is-unavailable {
-  background: var(--cream-deep);
-  border-color: var(--cream-deep);
   color: var(--taupe-soft);
   cursor: not-allowed;
 }
-.date-chip.is-unavailable .date-chip__dow {
-  color: var(--taupe-soft);
+.month-cal__weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0 0.1rem;
 }
-/* The reason, spelled out under the number. A past or closed day that only
-   went pale would read as a rendering accident. */
-.date-chip__badge {
+.month-cal__weekdays span {
+  text-align: center;
   font-size: var(--fs-micro);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--taupe-soft);
 }
-.date-strip__arrow:disabled {
+.month-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.month-cal__pad {
+  min-height: 52px;
+}
+.month-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 52px;
+  padding: 0.5rem 0.2rem;
   background: var(--cream);
+  border: 2px solid var(--cream-line);
+  border-radius: var(--radius-sm);
+  color: var(--taupe);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.month-day__num {
+  font-size: var(--fs-body-lg);
+  font-family: var(--font-display);
+}
+.month-day.is-selected {
+  border-color: var(--cherry);
+  background: var(--cherry);
+  color: var(--white);
+}
+.month-day.is-unavailable {
+  background: var(--cream-deep);
+  border-color: var(--cream-deep);
   color: var(--taupe-soft);
   cursor: not-allowed;
+}
+/* The reason, spelled out under the number. A day that only went pale would
+   read as a rendering accident rather than a stated "nothing here". */
+.month-day__badge {
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--taupe-soft);
+}
+/* Still checking with the backend for this one — a quiet pulse, not a
+   spinner, since most days resolve before the visitor even looks. */
+.month-day.is-pending {
+  animation: month-day-pulse 1.4s ease-in-out infinite;
+}
+@keyframes month-day-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .month-day.is-pending {
+    animation: none;
+    opacity: 0.75;
+  }
 }
 
 .slot-groups {
@@ -846,27 +872,26 @@
     margin-top: 0.15rem;
   }
 
-  /* Seven columns across a phone gave each day 32px — too narrow for the word
-     the closed and past days have to carry, and too narrow for a thumb. The
-     week becomes a snapping scroller instead: full-size chips, five or so in
-     view, and the arrows above still page a week at a time. */
-  .date-strip__days {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    /* Room for the focus ring, which would otherwise be clipped by the scroller. */
-    padding: 4px;
-    margin: -4px;
+  /* A month grid can't scroll its way to more room the way a week strip
+     could — seven columns is the shape of a calendar. So the cells shrink
+     instead: the badge word drops (the button's aria-label still carries
+     the full reason for a screen reader) and only the number stays. */
+  .month-cal__grid,
+  .month-cal__weekdays {
+    gap: 0.3rem;
   }
-  .date-strip__days::-webkit-scrollbar {
+  .month-day,
+  .month-cal__pad {
+    min-height: 40px;
+  }
+  .month-day {
+    padding: 0.3rem 0.1rem;
+  }
+  .month-day__num {
+    font-size: var(--fs-body);
+  }
+  .month-day__badge {
     display: none;
-  }
-  .date-chip {
-    flex: 0 0 60px;
-    scroll-snap-align: start;
-    padding: 0.5rem 0.2rem;
   }
   .confirmed-card__details {
     grid-template-columns: 1fr;
