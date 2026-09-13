@@ -20,6 +20,7 @@ export default function Portfolio({ onBook }) {
     id: item.id,
     src: item.photo,
     srcSmall: item.photoSmall,
+    srcWidth: item.photoWidth,
     position: item.photoPosition,
     caption: item[lang]?.caption,
     alt: `${t.portfolio.imageAlt} — ${item[lang]?.caption ?? ""}`,
@@ -86,9 +87,22 @@ export default function Portfolio({ onBook }) {
               style={{ "--tile-index": index }}
               onClick={() => onBook(item.serviceId, item.professionalId)}
             >
+              {/* Width descriptors + sizes, not density (1x/2x) descriptors:
+                  a 1x/2x pair leaves the browser guessing a device-pixel-ratio
+                  "bucket" with no notion of actual layout size, and on a
+                  ~2.6-3x mobile DPR it rounds up to the 2x file even though a
+                  480px-wide tile only ever needs the small one. `sizes` gives
+                  it the real CSS width so it can pick correctly regardless of
+                  DPR — mirrors the grid's own breakpoint at 900px, where a
+                  "wide" tile drops back to a single column (Portfolio.css). */}
               <img
                 src={item.src}
-                srcSet={`${item.srcSmall} 1x, ${item.src} 2x`}
+                srcSet={`${item.srcSmall} 480w, ${item.src} ${item.srcWidth}w`}
+                sizes={
+                  isWideTile(index)
+                    ? "(max-width: 900px) 45vw, 63vw"
+                    : "(max-width: 900px) 45vw, 31vw"
+                }
                 alt={item.alt}
                 loading="lazy"
                 className="portfolio-tile__image"

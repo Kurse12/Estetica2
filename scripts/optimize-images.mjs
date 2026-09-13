@@ -35,10 +35,13 @@ const PORTFOLIO = [
   "maquillaje-editorial",
 ];
 
-// Professional card photos: displayed at ~493-666 CSS px in Professionals.jsx,
-// which the source files already roughly match — recompressed in place only,
-// no resize.
+// Professional card photos: Professionals.jsx renders them inside a
+// max-width: 300px CSS frame (mobile carousel: 76vw capped at 300px), which
+// PageSpeed's mobile crawl measured as needing ~493-497 physical px at that
+// device's DPR — the 730-736px-wide sources were still ~1.5x oversized.
+// 620px covers that with headroom to spare for wider/higher-DPR phones.
 const PROFESSIONALS = ["camila-reyes", "valentina-ortiz", "sofia-aguirre", "marcela-duarte"];
+const PROFESSIONAL_CARD_WIDTH = 620;
 
 // Reads the source fully into memory first rather than handing sharp the
 // path, and only then writes the result — sharp keeps its own handle on a
@@ -50,12 +53,6 @@ async function resizeTo(srcUrl, destUrl, targetWidth, quality) {
   const originalWidth = (await sharp(input).metadata()).width;
   const width = Math.min(targetWidth, originalWidth);
   const buffer = await sharp(input).resize({ width }).webp({ quality }).toBuffer();
-  await writeFile(p(destUrl), buffer);
-}
-
-async function recompress(srcUrl, destUrl, quality) {
-  const input = await readFile(p(srcUrl));
-  const buffer = await sharp(input).webp({ quality }).toBuffer();
   await writeFile(p(destUrl), buffer);
 }
 
@@ -79,9 +76,9 @@ async function run() {
 
     // 56 CSS px avatar at up to 3x DPR = ~168px; 200px keeps headroom.
     await resizeTo(src, destThumb, 200, 75);
-    // Recompress the full card photo in place — no resize, dimensions
-    // already suit the ~493-666 CSS px display size.
-    await recompress(src, src, 82);
+    // Capped/recompressed card photo, overwriting the original filename in
+    // place — see PROFESSIONAL_CARD_WIDTH above.
+    await resizeTo(src, src, PROFESSIONAL_CARD_WIDTH, 80);
 
     console.log(`professional: ${name}`);
   }
