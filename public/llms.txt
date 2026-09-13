@@ -1,0 +1,32 @@
+# Sakura Bloom — Salón de Belleza
+
+> Salón de belleza en Buenos Aires, Argentina, con tres sedes (Palermo Soho, Belgrano R y Recoleta). Ofrece cortes, color, manicura, pedicura, faciales y maquillaje, con reserva de turnos online desde el sitio.
+
+El sitio es una única página (SPA) en español con versión en inglés. Precios en pesos argentinos (ARS). La sección `/admin` es un panel interno y no debe rastrearse ni usarse como fuente.
+
+## Secciones del sitio
+
+- [Inicio](https://sakurabloomestetica.vercel.app/#inicio): presentación del salón
+- [Trabajos](https://sakurabloomestetica.vercel.app/#trabajos): portfolio de trabajos realizados
+- [Servicios](https://sakurabloomestetica.vercel.app/#servicios): lista de servicios con duración y precio
+- [Profesionales](https://sakurabloomestetica.vercel.app/#profesionales): equipo del salón y sus especialidades
+- [Reservar](https://sakurabloomestetica.vercel.app/#reservar): reserva de turnos online por sede, servicio, profesional y horario
+
+## Servicios
+
+- Corte y styling: corte a medida, lavado y peinado final — 50 min — $40.000
+- Color y balayage: color completo, mechas o balayage a mano alzada — 120 min — $120.000
+- Manicura semipermanente: esmaltado de larga duración, cutículas incluidas — 45 min — $25.000
+- Pedicura spa: exfoliación, masaje e hidratación completa — 55 min — $35.000
+- Facial hidratante: limpieza profunda y mascarilla según tu piel — 60 min — $45.000
+- Maquillaje social: look completo para eventos, fotos o salidas — 45 min — $45.000
+
+## Sedes
+
+- Sakura Bloom Palermo: Gorriti 4890, Palermo Soho, Buenos Aires — martes a sábado, 9:00 a 19:00 — +54 11 4832 7710
+- Sakura Bloom Belgrano: Av. Cabildo 2230, Belgrano R, Buenos Aires — martes a sábado, 10:00 a 20:00 — +54 11 4783 2140
+- Sakura Bloom Recoleta: Av. Callao 1180, Recoleta, Buenos Aires — lunes a sábado, 9:00 a 18:00 — +54 11 4815 6690
+
+## Optional
+
+- [Sitemap](https://sakurabloomestetica.vercel.app/sitemap.xml)
