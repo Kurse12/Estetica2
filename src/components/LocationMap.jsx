@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { useLanguage } from "../i18n/LanguageContext";
 import { locations } from "../data";
 import Icon from "./Icon";
@@ -27,7 +25,7 @@ function prefersReducedMotion() {
 /* A blossom rather than Leaflet's default blue teardrop: the marker is drawn
    entirely in CSS off this markup, so it inherits the site's palette and the
    active state is a class toggle instead of a swapped image. */
-function pinIcon() {
+function pinIcon(L) {
   return L.divIcon({
     className: "map-pin",
     html: `<span class="map-pin__dot"></span><span class="map-pin__label"></span>`,
@@ -40,56 +38,94 @@ export default function LocationMap() {
   const { t, lang } = useLanguage();
   const [activeId, setActiveId] = useState(null);
 
+  const sectionRef = useRef(null);
   const canvasRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef({});
+
+  // Leaflet (~40KB gzipped) plus its first batch of OpenStreetMap tiles has
+  // no business loading before the visitor has scrolled anywhere near the
+  // footer — Lighthouse flagged those tile requests firing on initial load
+  // and competing with the page's actually-critical resources. The section
+  // starts loading 400px before it enters the viewport so the map is already
+  // there by the time scrolling reaches it.
+  const [nearViewport, setNearViewport] = useState(false);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   /* Built once and torn down with the component. Leaflet owns the DOM inside
      the canvas, so React must never re-render into it — every later change
      (labels, selection, size) is pushed through the refs below. */
   useEffect(() => {
-    const map = L.map(canvasRef.current, {
-      // The page scrolls under Lenis; a map that ate the wheel would trap the
-      // reader at the bottom of the footer. Zoom stays on the buttons and on
-      // pinch, where the intent is unambiguous.
-      scrollWheelZoom: false,
-      zoomControl: true,
-      attributionControl: true,
+    if (!nearViewport) return;
+    let cancelled = false;
+    let cleanup = () => {};
+
+    Promise.all([import("leaflet"), import("leaflet/dist/leaflet.css")]).then(([leafletMod]) => {
+      if (cancelled) return;
+      const L = leafletMod.default;
+
+      const map = L.map(canvasRef.current, {
+        // The page scrolls under Lenis; a map that ate the wheel would trap
+        // the reader at the bottom of the footer. Zoom stays on the buttons
+        // and on pinch, where the intent is unambiguous.
+        scrollWheelZoom: false,
+        zoomControl: true,
+        attributionControl: true,
+      });
+
+      // OSM's own tiles: free and keyless. The palette they ship in is far
+      // louder than this page, so the tile pane is desaturated and warmed in
+      // CSS rather than swapped for a pale basemap behind an API key.
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      locations.forEach((loc) => {
+        const marker = L.marker(loc.coords, { icon: pinIcon(L), riseOnHover: true })
+          .addTo(map)
+          .on("click", () => setActiveId(loc.id));
+        markersRef.current[loc.id] = marker;
+      });
+
+      map.fitBounds(locations.map((l) => l.coords), { ...overviewFit(map), animate: false });
+
+      mapRef.current = map;
+
+      // The footer sits below a page of reveal animations and late-loading
+      // fonts; if the canvas is measured before it settles, Leaflet paints a
+      // strip of grey where tiles should be.
+      const resizeObserver = new ResizeObserver(() => map.invalidateSize());
+      resizeObserver.observe(canvasRef.current);
+
+      cleanup = () => {
+        resizeObserver.disconnect();
+        map.remove();
+        mapRef.current = null;
+        markersRef.current = {};
+      };
     });
-
-    // OSM's own tiles: free and keyless. The palette they ship in is far
-    // louder than this page, so the tile pane is desaturated and warmed in CSS
-    // rather than swapped for a pale basemap behind an API key.
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
-
-    locations.forEach((loc) => {
-      const marker = L.marker(loc.coords, { icon: pinIcon(), riseOnHover: true })
-        .addTo(map)
-        .on("click", () => setActiveId(loc.id));
-      markersRef.current[loc.id] = marker;
-    });
-
-    map.fitBounds(locations.map((l) => l.coords), { ...overviewFit(map), animate: false });
-
-    mapRef.current = map;
-
-    // The footer sits below a page of reveal animations and late-loading
-    // fonts; if the canvas is measured before it settles, Leaflet paints a
-    // strip of grey where tiles should be.
-    const observer = new ResizeObserver(() => map.invalidateSize());
-    observer.observe(canvasRef.current);
 
     return () => {
-      observer.disconnect();
-      map.remove();
-      mapRef.current = null;
-      markersRef.current = {};
+      cancelled = true;
+      cleanup();
     };
-  }, []);
+  }, [nearViewport]);
 
   // Pin labels are the only Leaflet-owned text, so they are the only thing a
   // language switch has to reach into the map to change. They are written here
@@ -128,7 +164,7 @@ export default function LocationMap() {
   const copy = t.footer.map;
 
   return (
-    <section className="location-map" aria-labelledby="location-map-title">
+    <section className="location-map" aria-labelledby="location-map-title" ref={sectionRef}>
       <header className="location-map__head">
         <div>
           <h3 className="location-map__title" id="location-map-title">

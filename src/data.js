@@ -6,19 +6,33 @@
 export const priceFmt = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 });
 
 import camilaReyes from "./assets/camila-reyes.webp";
+import camilaReyesThumb from "./assets/camila-reyes-thumb.webp";
 import valentinaOrtiz from "./assets/valentina-ortiz.webp";
+import valentinaOrtizThumb from "./assets/valentina-ortiz-thumb.webp";
 import sofiaAguirre from "./assets/sofia-aguirre.webp";
+import sofiaAguirreThumb from "./assets/sofia-aguirre-thumb.webp";
 import marcelaDuarte from "./assets/marcela-duarte.webp";
+import marcelaDuarteThumb from "./assets/marcela-duarte-thumb.webp";
 import ritualDeLavado from "./assets/ritual-de-lavado.webp";
+import ritualDeLavadoSmall from "./assets/ritual-de-lavado-480.webp";
 import peinadoConBucles from "./assets/peinado-con-bucles.webp";
+import peinadoConBuclesSmall from "./assets/peinado-con-bucles-480.webp";
 import balayage from "./assets/balayage.webp";
+import balayageSmall from "./assets/balayage-480.webp";
 import brushingProfesional from "./assets/brushing-profesional.webp";
+import brushingProfesionalSmall from "./assets/brushing-profesional-480.webp";
 import manicuraDePrecision from "./assets/manicura-de-precision.webp";
+import manicuraDePrecisionSmall from "./assets/manicura-de-precision-480.webp";
 import esmaltadoTemporada from "./assets/esmaltado-de-temporada.webp";
+import esmaltadoTemporadaSmall from "./assets/esmaltado-de-temporada-480.webp";
 import esmaltadoNatural from "./assets/esmaltado-natural.webp";
+import esmaltadoNaturalSmall from "./assets/esmaltado-natural-480.webp";
 import facialHidratante from "./assets/facial-hidratante.webp";
+import facialHidratanteSmall from "./assets/facial-hidratante-480.webp";
 import maquillajeEditorial from "./assets/maquillaje-editorial.webp";
+import maquillajeEditorialSmall from "./assets/maquillaje-editorial-480.webp";
 import maquillajeSocial from "./assets/maquillaje-social.webp";
+import maquillajeSocialSmall from "./assets/maquillaje-social-480.webp";
 
 export const services = [
   {
@@ -134,7 +148,7 @@ export const professionals = [
     en: { role: "Senior stylist", specialty: "Cuts & color", bio: "12 years shaping every kind of hair — no two cuts alike." },
     years: 12,
     photo: camilaReyes,
-    photoSmall: camilaReyes,
+    photoSmall: camilaReyesThumb,
     services: ["corte", "color"],
     homeBranch: "palermo",
   },
@@ -150,7 +164,7 @@ export const professionals = [
     en: { role: "Nail technician", specialty: "Manicure & pedicure", bio: "Millimeter precision and a polish shelf that never stops growing." },
     years: 7,
     photo: valentinaOrtiz,
-    photoSmall: valentinaOrtiz,
+    photoSmall: valentinaOrtizThumb,
     services: ["manicura", "pedicura"],
     homeBranch: "belgrano",
   },
@@ -166,7 +180,7 @@ export const professionals = [
     en: { role: "Esthetician", specialty: "Facials", bio: "Reads your skin before touching it, and picks the treatment to match." },
     years: 9,
     photo: sofiaAguirre,
-    photoSmall: sofiaAguirre,
+    photoSmall: sofiaAguirreThumb,
     services: ["facial"],
     homeBranch: "recoleta",
   },
@@ -182,7 +196,7 @@ export const professionals = [
     en: { role: "Makeup artist", specialty: "Event & editorial makeup", bio: "From fashion backstage to the salon floor: every face gets its own plan." },
     years: 10,
     photo: marcelaDuarte,
-    photoSmall: marcelaDuarte,
+    photoSmall: marcelaDuarteThumb,
     services: ["maquillaje"],
     homeBranch: "palermo",
   },
@@ -203,6 +217,7 @@ export const portfolio = [
     es: { caption: "Ritual de lavado" },
     en: { caption: "Wash ritual" },
     photo: ritualDeLavado,
+    photoSmall: ritualDeLavadoSmall,
     // Portrait source landing in the wide (landscape) tile — bias the cover
     // crop toward the top so the face and hands survive instead of a
     // center crop that would show only a strip of hair.
@@ -215,6 +230,7 @@ export const portfolio = [
     es: { caption: "Peinado con bucles" },
     en: { caption: "Curled styling" },
     photo: peinadoConBucles,
+    photoSmall: peinadoConBuclesSmall,
     serviceId: "corte",
     professionalId: "camila",
   },
@@ -223,6 +239,7 @@ export const portfolio = [
     es: { caption: "Balayage" },
     en: { caption: "Balayage" },
     photo: balayage,
+    photoSmall: balayageSmall,
     serviceId: "color",
     professionalId: "camila",
   },
@@ -231,6 +248,7 @@ export const portfolio = [
     es: { caption: "Brushing profesional" },
     en: { caption: "Professional blow-dry" },
     photo: brushingProfesional,
+    photoSmall: brushingProfesionalSmall,
     serviceId: "corte",
     professionalId: "camila",
   },
@@ -239,6 +257,7 @@ export const portfolio = [
     es: { caption: "Manicura de precisión" },
     en: { caption: "Precision manicure" },
     photo: manicuraDePrecision,
+    photoSmall: manicuraDePrecisionSmall,
     serviceId: "manicura",
     professionalId: "valentina",
   },
@@ -247,6 +266,7 @@ export const portfolio = [
     es: { caption: "Esmaltado de temporada" },
     en: { caption: "Seasonal polish" },
     photo: esmaltadoTemporada,
+    photoSmall: esmaltadoTemporadaSmall,
     serviceId: "manicura",
     professionalId: "valentina",
   },
@@ -255,6 +275,7 @@ export const portfolio = [
     es: { caption: "Manicura natural" },
     en: { caption: "Natural manicure" },
     photo: esmaltadoNatural,
+    photoSmall: esmaltadoNaturalSmall,
     serviceId: "manicura",
     professionalId: "valentina",
   },
@@ -263,6 +284,7 @@ export const portfolio = [
     es: { caption: "Facial hidratante" },
     en: { caption: "Hydrating facial" },
     photo: facialHidratante,
+    photoSmall: facialHidratanteSmall,
     serviceId: "facial",
     professionalId: "sofia",
   },
@@ -271,6 +293,7 @@ export const portfolio = [
     es: { caption: "Maquillaje social" },
     en: { caption: "Event makeup" },
     photo: maquillajeSocial,
+    photoSmall: maquillajeSocialSmall,
     serviceId: "maquillaje",
     professionalId: "marcela",
   },
@@ -279,6 +302,7 @@ export const portfolio = [
     es: { caption: "Maquillaje editorial" },
     en: { caption: "Editorial makeup" },
     photo: maquillajeEditorial,
+    photoSmall: maquillajeEditorialSmall,
     serviceId: "maquillaje",
     professionalId: "marcela",
   },

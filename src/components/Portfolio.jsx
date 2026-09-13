@@ -19,6 +19,7 @@ export default function Portfolio({ onBook }) {
   const gridItems = portfolio.map((item) => ({
     id: item.id,
     src: item.photo,
+    srcSmall: item.photoSmall,
     position: item.photoPosition,
     caption: item[lang]?.caption,
     alt: `${t.portfolio.imageAlt} — ${item[lang]?.caption ?? ""}`,
@@ -87,6 +88,7 @@ export default function Portfolio({ onBook }) {
             >
               <img
                 src={item.src}
+                srcSet={`${item.srcSmall} 1x, ${item.src} 2x`}
                 alt={item.alt}
                 loading="lazy"
                 className="portfolio-tile__image"

@@ -21,7 +21,24 @@
     <link rel="canonical" href="https://sakurabloomestetica.vercel.app/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital@1&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+    <!-- Loaded as a non-blocking preload rather than a plain stylesheet link:
+         a render-blocking request to fonts.googleapis.com plus the redirect
+         to fonts.gstatic.com for the actual files was costing ~800ms of
+         first paint (measured via Lighthouse) for a stylesheet that only
+         ever swaps type, never lays anything out. The noscript fallback
+         keeps the fonts working with JS disabled. -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital@1&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital@1&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      />
+    </noscript>
     <title>Sakura Bloom — Salón de Belleza</title>
 
     <!-- Open Graph / Twitter preview. The card is the hero itself, redrawn at
