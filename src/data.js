@@ -5,20 +5,20 @@
 
 export const priceFmt = new Intl.NumberFormat("es-AR", { maximumFractionDigits: 0 });
 
-import camilaReyes from "./assets/camila-reyes.jpg";
-import valentinaOrtiz from "./assets/valentina-ortiz.jpg";
-import sofiaAguirre from "./assets/sofia-aguirre.jpg";
-import marcelaDuarte from "./assets/marcela-duarte.jpg";
-import ritualDeLavado from "./assets/ritual-de-lavado.jpg";
-import peinadoConBucles from "./assets/peinado-con-bucles.jpg";
-import balayage from "./assets/balayage.jpg";
-import brushingProfesional from "./assets/brushing-profesional.jpg";
-import manicuraDePrecision from "./assets/manicura-de-precision.jpg";
-import esmaltadoTemporada from "./assets/esmaltado-de-temporada.jpg";
-import esmaltadoNatural from "./assets/esmaltado-natural.jpg";
-import facialHidratante from "./assets/facial-hidratante.jpg";
-import maquillajeEditorial from "./assets/maquillaje-editorial.jpg";
-import maquillajeSocial from "./assets/maquillaje-social.jpg";
+import camilaReyes from "./assets/camila-reyes.webp";
+import valentinaOrtiz from "./assets/valentina-ortiz.webp";
+import sofiaAguirre from "./assets/sofia-aguirre.webp";
+import marcelaDuarte from "./assets/marcela-duarte.webp";
+import ritualDeLavado from "./assets/ritual-de-lavado.webp";
+import peinadoConBucles from "./assets/peinado-con-bucles.webp";
+import balayage from "./assets/balayage.webp";
+import brushingProfesional from "./assets/brushing-profesional.webp";
+import manicuraDePrecision from "./assets/manicura-de-precision.webp";
+import esmaltadoTemporada from "./assets/esmaltado-de-temporada.webp";
+import esmaltadoNatural from "./assets/esmaltado-natural.webp";
+import facialHidratante from "./assets/facial-hidratante.webp";
+import maquillajeEditorial from "./assets/maquillaje-editorial.webp";
+import maquillajeSocial from "./assets/maquillaje-social.webp";
 
 export const services = [
   {
