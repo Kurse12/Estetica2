@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { onSmoothScroll } from "../lib/smoothScroll";
 import Icon from "./Icon";
@@ -96,7 +96,7 @@ export default function Hero() {
     };
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const innerEl = innerRef.current;
 
     const clearVars = () => {
@@ -172,10 +172,21 @@ export default function Hero() {
       apply();
     }
 
-    apply();
+    // The first measurement waits for a ResizeObserver instead of running here.
+    // Called straight from the mount effect, getBoundingClientRect() made the
+    // browser lay out the whole freshly committed page synchronously inside
+    // React's commit (Lighthouse: ~104ms of forced reflow). An observer's
+    // callback runs after the frame's own layout and before its paint, so the
+    // read is free and the radius still lands in the first painted frame. It
+    // also re-measures when the section's width changes; the window listener
+    // stays for height-only resizes (mobile toolbars), which move the peek
+    // without resizing the box.
+    const observer = new ResizeObserver(onResize);
+    observer.observe(domeEl ?? document.documentElement);
     const unsubscribe = onSmoothScroll(apply);
     window.addEventListener("resize", onResize);
     return () => {
+      observer.disconnect();
       unsubscribe();
       window.removeEventListener("resize", onResize);
       clearVars();
